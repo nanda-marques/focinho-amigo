@@ -1,4 +1,5 @@
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Outlet } from "react-router-dom";
+import PublicMenu from "./components/layout/PublicMenu";
 
 import Home from "./pages/public/Home/Home";
 import About from "./pages/public/About/About";
@@ -18,28 +19,41 @@ import PublicationEditor from "./pages/admin/PublicationEditor/PublicationEditor
 import Preview from "./pages/admin/Preview/Preview";
 import Settings from "./pages/admin/Settings/Settings";
 
+function PublicLayout() {
+  return (
+    <>
+      <PublicMenu />
+      <main>
+        <Outlet />
+      </main>
+    </>
+  );
+}
+
 function App() {
   return (
     <BrowserRouter>
-      <Routes>
-        <Route path="/" element={<Home />} />
-        <Route path="/sobre-nos" element={<About />} />
-        <Route path="/adocao" element={<Adoption />} />
-        <Route path="/apadrinhamento" element={<Sponsorship />} />
-        <Route path="/voluntariado" element={<Volunteer />} />
-        <Route path="/como-ajudar" element={<Help />} />
-        <Route path="/contato" element={<Contact />} />
-        <Route path="/campanhas-e-noticias" element={<CampaignsNews />} />
+     <Routes>
+  <Route element={<PublicLayout />}>
+    <Route path="/" element={<Home />} />
+    <Route path="/sobre-nos" element={<About />} />
+    <Route path="/adocao" element={<Adoption />} />
+    <Route path="/apadrinhamento" element={<Sponsorship />} />
+    <Route path="/voluntariado" element={<Volunteer />} />
+    <Route path="/como-ajudar" element={<Help />} />
+    <Route path="/contato" element={<Contact />} />
+    <Route path="/campanhas-e-noticias" element={<CampaignsNews />} />
+  </Route>
 
-        <Route path="/admin/login" element={<Login />} />
-        <Route path="/admin/cadastro" element={<Register />} />
-        <Route path="/admin/dashboard" element={<Dashboard />} />
-        <Route path="/admin/animais" element={<Animals />} />
-        <Route path="/admin/publicacoes" element={<Publications />} />
-        <Route path="/admin/publicacoes/criar-editar" element={<PublicationEditor />} />
-        <Route path="/admin/preview" element={<Preview />} />
-        <Route path="/admin/config" element={<Settings />} />
-      </Routes>
+  <Route path="/admin/login" element={<Login />} />
+  <Route path="/admin/cadastro" element={<Register />} />
+  <Route path="/admin/dashboard" element={<Dashboard />} />
+  <Route path="/admin/animais" element={<Animals />} />
+  <Route path="/admin/publicacoes" element={<Publications />} />
+  <Route path="/admin/publicacoes/criar-editar" element={<PublicationEditor />} />
+  <Route path="/admin/preview" element={<Preview />} />
+  <Route path="/admin/config" element={<Settings />} />
+</Routes>
     </BrowserRouter>
   );
 }

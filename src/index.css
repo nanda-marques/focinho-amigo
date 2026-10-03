@@ -1,15 +1,20 @@
-* {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
+@import "tailwindcss";
+
+@theme {
+  --color-marca: #1a73b8;
+  --color-marca-escura: #14598d;
+  --color-destaque: #ffb800;
+  --color-destaque-escura: #e6a600;
 }
 
-body {
-  font-family: Arial, sans-serif;
-  background-color: #ffffff;
-  color: #333333;
-}
+@layer base {
+  body {
+    font-family: Arial, sans-serif;
+    background-color: #ffffff;
+    color: #333333;
+  }
 
-main {
-  padding: 40px;
+  main {
+    padding: 40px;
+  }
 }
