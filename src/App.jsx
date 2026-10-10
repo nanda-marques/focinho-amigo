@@ -2,6 +2,7 @@ import { BrowserRouter, Routes, Route, Outlet } from "react-router-dom";
 
 import PublicMenu from "./components/layout/PublicMenu";
 import PublicFooter from "./components/layout/PublicFooter";
+import AdminMenu from "./components/layout/AdminMenu";
 
 import Home from "./pages/public/Home/Home";
 import About from "./pages/public/About/About";
@@ -33,6 +34,17 @@ function PublicLayout() {
   );
 }
 
+function AdminLayout() {
+  return (
+    <div className="flex min-h-screen bg-[#f0f0f0]">
+      <AdminMenu />
+      <main className="min-w-0 flex-1 p-6 pt-16 lg:pt-6">
+        <Outlet />
+      </main>
+    </div>
+  );
+}
+
 function App() {
   return (
     <BrowserRouter>
@@ -49,15 +61,19 @@ function App() {
           <Route path="/campanhas-e-noticias" element={<CampaignsNews />} />
         </Route>
 
-        {/* ADMIN */}
+        {/* ADMIN SEM MENU */}
         <Route path="/admin/login" element={<Login />} />
         <Route path="/admin/cadastro" element={<Register />} />
-        <Route path="/admin/dashboard" element={<Dashboard />} />
-        <Route path="/admin/animais" element={<Animals />} />
-        <Route path="/admin/publicacoes" element={<Publications />} />
-        <Route path="/admin/publicacoes/criar-editar" element={<PublicationEditor />} />
         <Route path="/admin/preview" element={<Preview />} />
-        <Route path="/admin/config" element={<Settings />} />
+
+        {/* ADMIN COM MENU */}
+        <Route element={<AdminLayout />}>
+          <Route path="/admin/dashboard" element={<Dashboard />} />
+          <Route path="/admin/animais" element={<Animals />} />
+          <Route path="/admin/publicacoes" element={<Publications />} />
+          <Route path="/admin/publicacoes/criar-editar" element={<PublicationEditor />} />
+          <Route path="/admin/config" element={<Settings />} />
+        </Route>
       </Routes>
     </BrowserRouter>
   );

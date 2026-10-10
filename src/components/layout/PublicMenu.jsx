@@ -88,7 +88,7 @@ export default function PublicMenu() {
       <div className="mx-auto flex max-w-7xl items-center justify-between gap-6 px-5 py-3 lg:px-14">
         {/* Logo */}
 <NavLink to="/" className="flex shrink-0 items-center gap-2">
-  <img src="/logo 1.svg" alt="" className="h-11 w-auto" />
+  <img src="src/assets/logo.svg" alt="" className="h-11 w-auto" />
   <span className="flex flex-col leading-none">
     <strong className="whitespace-nowrap text-xl font-bold text-marca">
       Focinho Amigo
