@@ -8,14 +8,13 @@ const LINK_FORMULARIO = "https://forms.google.com/";
 const PER_PAGE = 6;
 
 // TODO: trocar por dados vindos do back-end quando existir.
-// Imagens seguem o padrão da Home: /images/pets/<nome>.jpg (pasta public)
 const pets = [
-  { nome: "Amora", tipo: "Cão", sexo: "F", idade: "1 ano", anos: 1, porte: "Grande", tags: [], descricao: "Dócil, super brincalhona e adora crianças. Resgatada de um quintal abandonado.", imagem: "/images/pets/amora.jpg" },
-  { nome: "Mingau", tipo: "Gato", sexo: "M", idade: "6 meses", anos: 0, porte: "Pequeno", tags: ["FIV/FELV"], descricao: "Companheiro, adora tirar cochilos no colo e ronrona ao menor toque.", imagem: "/images/pets/mingau.jpg" },
-  { nome: "Bobi", tipo: "Cão", sexo: "M", idade: "3 anos", anos: 3, porte: "Médio", tags: [], descricao: "Ativo, protetor e muito esperto. Um excelente companheiro para caminhadas ao ar livre.", imagem: "/images/pets/bobi.jpg" },
-  { nome: "Lili", tipo: "Gato", sexo: "F", idade: "2 anos", anos: 2, porte: "Pequeno", tags: ["Diabetes"], descricao: "Calma, independente e elegante. Ideal para apartamentos silenciosos.", imagem: "/images/pets/lili.jpg" },
-  { nome: "Toby", tipo: "Cão", sexo: "M", idade: "4 anos", anos: 4, porte: "Médio", tags: ["Surdez Adquirida"], descricao: "Simpático, adora petiscos e passeios calmos. Excelente relacionamento com outros cães.", imagem: "/images/pets/toby.jpg" },
-  { nome: "Bela", tipo: "Cão", sexo: "F", idade: "5 anos", anos: 5, porte: "Médio", tags: [], descricao: "Madura, sossegada e carinhosa. Perfeita para quem busca uma companheira tranquila e...", imagem: "/images/pets/bela.jpg" },
+  { nome: "Amora", tipo: "Cão", sexo: "F", idade: "1 ano", anos: 1, porte: "Grande", tags: [], descricao: "Dócil, super brincalhona e adora crianças. Resgatada de um quintal abandonado.", imagem: "src/assets/images/pets/amora.png" },
+  { nome: "Mingau", tipo: "Gato", sexo: "M", idade: "6 meses", anos: 0, porte: "Pequeno", tags: ["FIV/FELV"], descricao: "Companheiro, adora tirar cochilos no colo e ronrona ao menor toque.", imagem: "src/assets/images/pets/mingau.png" },
+  { nome: "Bobi", tipo: "Cão", sexo: "M", idade: "3 anos", anos: 3, porte: "Médio", tags: [], descricao: "Ativo, protetor e muito esperto. Um excelente companheiro para caminhadas ao ar livre.", imagem: "src/assets/images/pets/bobi.png" },
+  { nome: "Lili", tipo: "Gato", sexo: "F", idade: "2 anos", anos: 2, porte: "Pequeno", tags: ["Diabetes"], descricao: "Calma, independente e elegante. Ideal para apartamentos silenciosos.", imagem: "src/assets/images/pets/lili.png" },
+  { nome: "Toby", tipo: "Cão", sexo: "M", idade: "4 anos", anos: 4, porte: "Médio", tags: ["Surdez Adquirida"], descricao: "Simpático, adora petiscos e passeios calmos. Excelente relacionamento com outros cães.", imagem: "src/assets/images/pets/toby.png" },
+  { nome: "Bela", tipo: "Cão", sexo: "F", idade: "5 anos", anos: 5, porte: "Médio", tags: [], descricao: "Madura, sossegada e carinhosa. Perfeita para quem busca uma companheira tranquila e...", imagem: "src/assets/images/pets/bela.png" },
 ];
 
 const passos = [
