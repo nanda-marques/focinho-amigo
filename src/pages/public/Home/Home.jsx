@@ -5,19 +5,19 @@ const pets = [
     nome: "Mel",
     especie: "Vira-lata",
     idade: "2 anos",
-    imagem: "/images/pets/mel.jpg",
+    imagem: "src/assets/images/pets/mel.png",
   },
   {
     nome: "Simba",
     especie: "Siamês Mix",
     idade: "1 ano",
-    imagem: "/images/pets/simba.jpg",
+    imagem: "src/assets/images/pets/simba.png",
   },
   {
     nome: "Barney",
     especie: "Basset Mix",
     idade: "4 anos",
-    imagem: "/images/pets/barney.jpg",
+    imagem: "src/assets/images/pets/barney.png",
   },
 ];
 
@@ -66,7 +66,7 @@ export default function Home() {
       <section
         className="relative flex min-h-[430px] items-center bg-cover bg-center"
         style={{
-          backgroundImage: "url('src/assets/home/hero.png')",
+          backgroundImage: "url('src/assets/hero/hero.png')",
         }}
       >
         {/* Overlay escuro */}
@@ -116,7 +116,7 @@ export default function Home() {
           <div className="grid overflow-hidden rounded-2xl border border-destaque bg-[#fffdf3] md:grid-cols-[280px_1fr]">
 
             <img
-              src="src/assets/home/rex.png"
+              src="src/assets/images/pets/rex.png"
               alt="Rex"
               className="h-full min-h-[190px] w-full object-cover"
             />
@@ -248,7 +248,7 @@ export default function Home() {
         <div className="mx-auto grid max-w-7xl items-center gap-10 md:grid-cols-2">
 
           <img
-            src="/images/home/equipe.jpg"
+            src="src/assets/images/equipe.png"
             alt="Equipe do Focinho Amigo com animais resgatados"
             className="h-[320px] w-full rounded-2xl object-cover"
           />
