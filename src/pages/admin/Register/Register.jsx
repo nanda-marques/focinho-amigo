@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { FiMail, FiLock, FiEye, FiEyeOff, FiHeart, FiCamera, FiChevronDown, FiAlertCircle, FiCheck } from "react-icons/fi";
 import logo from "../../../assets/image 3.svg";
 
-const CARGOS = ["Gestor de Projetos", "Coordenador de Adoções", "Coordenador de Voluntários", "Comunicação e Marketing", "Financeiro"];
+const CARGOS = ["Administrador"];;
 const FORCA = [
   null,
   { txt: "Fraca • Mínimo 8 caracteres e caracteres especiais", barra: "bg-red-500", cor: "text-red-500" },
