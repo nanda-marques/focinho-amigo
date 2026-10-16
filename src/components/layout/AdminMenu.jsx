@@ -11,6 +11,8 @@ import {
 } from "react-icons/lu";
 import logo from "../../assets/image 3.svg"; // ajuste o caminho conforme a pasta do arquivo
 
+import { logout } from "../../services/auth";
+
 const links = [
   { to: "/admin/dashboard", label: "Dashboard", icone: LuLayoutDashboard },
   { to: "/admin/publicacoes", label: "Publicações", icone: LuFileText },
@@ -25,13 +27,6 @@ const itemClass =
 
 export default function AdminMenu() {
   const [aberto, setAberto] = useState(false);
-  const navigate = useNavigate();
-
-  function sair() {
-    // Limpe aqui a sessão já existente no projeto (token, contexto de auth etc.)
-    localStorage.removeItem("token");
-    navigate("/admin/login");
-  }
 
   return (
     <>
@@ -84,7 +79,7 @@ export default function AdminMenu() {
             </NavLink>
           ))}
 
-          <button type="button" onClick={sair} className={`${itemClass} cursor-pointer hover:bg-white/10`}>
+          <button type="button" onClick={logout} className={`${itemClass} cursor-pointer hover:bg-white/10`}> 
             <LuLogOut className="h-5 w-5 shrink-0" />
             Sair
           </button>

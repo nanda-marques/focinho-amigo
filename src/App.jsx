@@ -22,6 +22,8 @@ import PublicationEditor from "./pages/admin/PublicationEditor/PublicationEditor
 import Preview from "./pages/admin/Preview/Preview";
 import Settings from "./pages/admin/Settings/Settings";
 
+import RotaProtegida from "./components/RotaProtegida";
+
 function PublicLayout() {
   return (
     <>
@@ -61,19 +63,31 @@ function App() {
           <Route path="/campanhas-e-noticias" element={<CampaignsNews />} />
         </Route>
 
+        
         {/* ADMIN SEM MENU */}
         <Route path="/admin/login" element={<Login />} />
         <Route path="/admin/cadastro" element={<Register />} />
         <Route path="/admin/preview" element={<Preview />} />
 
-        {/* ADMIN COM MENU */}
-        <Route element={<AdminLayout />}>
-          <Route path="/admin/dashboard" element={<Dashboard />} />
-          <Route path="/admin/animais" element={<Animals />} />
-          <Route path="/admin/publicacoes" element={<Publications />} />
-          <Route path="/admin/publicacoes/criar-editar" element={<PublicationEditor />} />
-          <Route path="/admin/config" element={<Settings />} />
+        {/* ADMIN COM MENU: ROTAS PROTEGIDAS */}
+        <Route
+          path="/admin"
+          element={
+            <RotaProtegida>
+              <AdminLayout />
+            </RotaProtegida>
+          }
+        >
+          <Route path="dashboard" element={<Dashboard />} />
+          <Route path="animais" element={<Animals />} />
+          <Route path="publicacoes" element={<Publications />} />
+          <Route
+            path="publicacoes/criar-editar"
+            element={<PublicationEditor />}
+          />
+          <Route path="config" element={<Settings />} />
         </Route>
+
       </Routes>
     </BrowserRouter>
   );

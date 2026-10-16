@@ -8,6 +8,9 @@ import {
 } from "react-icons/fi";
 import { FaPaw } from "react-icons/fa";
 
+import { useNavigate } from "react-router-dom";
+import { apiRequest } from "../../../services/api";
+
 import logo from "../../../assets/image 3.svg";
 
 export default function Login() {
@@ -15,10 +18,34 @@ export default function Login() {
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
 
-  function handleSubmit(event) {
+  const navigate = useNavigate();
+  const [erro, setErro] = useState("");
+  const [carregando, setCarregando] = useState(false);
+
+  async function handleSubmit(event) {
     event.preventDefault();
-    // Conecte à autenticação já existente no projeto.
-    console.log({ email, password });
+
+    setErro("");
+    setCarregando(true);
+
+    try {
+      const resposta = await apiRequest("/auth/login", {
+        method: "POST",
+        body: JSON.stringify({
+          email,
+          senha: password,
+        }),
+      });
+
+      localStorage.setItem("token", resposta.token);
+      localStorage.setItem("usuario", JSON.stringify(resposta.usuario));
+
+      navigate("/admin/dashboard", { replace: true });
+    } catch (error) {
+      setErro(error.message);
+    } finally {
+      setCarregando(false);
+    }
   }
 
   return (
@@ -124,11 +151,17 @@ export default function Login() {
               Esqueci minha senha
             </button>
 
+            {erro && (
+              <p role="alert" className="mt-4 text-sm text-red-600">
+                {erro}
+              </p>
+            )}
+
             <button 
               className="w-full h-[42px] mt-[31px] text-white font-inherit text-[13px] font-bold bg-[#2174b7] border-0 rounded-[8px] cursor-pointer transition-colors duration-150 hover:bg-[#1767a8]" 
               type="submit"
             >
-              Entrar no Painel
+              {carregando ? "Entrando..." : "Entrar no Painel"}
             </button>
           </form>
 
