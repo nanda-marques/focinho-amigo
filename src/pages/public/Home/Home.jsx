@@ -1,25 +1,6 @@
 import { Link } from "react-router-dom";
-
-const pets = [
-  {
-    nome: "Mel",
-    especie: "Vira-lata",
-    idade: "2 anos",
-    imagem: "src/assets/images/pets/mel.png",
-  },
-  {
-    nome: "Simba",
-    especie: "Siamês Mix",
-    idade: "1 ano",
-    imagem: "src/assets/images/pets/simba.png",
-  },
-  {
-    nome: "Barney",
-    especie: "Basset Mix",
-    idade: "4 anos",
-    imagem: "src/assets/images/pets/barney.png",
-  },
-];
+import { pets } from "../../../data/pets";
+import AnimalCard from "../../../components/layout/AnimalCard";
 
 const formasAjuda = [
   {
@@ -151,95 +132,50 @@ export default function Home() {
         </div>
       </section>
 
-      {/* =====================================================
-          PETS
-      ====================================================== */}
-      <section className="bg-[#f1f1f1] px-5 py-16 lg:px-14">
-        <div className="mx-auto max-w-7xl">
+    
+{/* =====================================================
+    PETS
+====================================================== */}
 
-          <div className="flex items-end justify-between gap-4">
-            <div>
-              <h2 className="text-2xl font-extrabold text-zinc-800">
-                Conheça nossos pets
-              </h2>
-
-              <p className="mt-1 text-sm text-zinc-500">
-                Eles estão vacinados, castrados e ansiosos para espalhar
-                alegria no seu lar.
-              </p>
-            </div>
-
-            <Link
-              to="/adocao"
-              className="hidden text-xs font-semibold text-marca md:block"
-            >
-              Procure por espécie ↓
-            </Link>
-          </div>
-
-          <div className="mt-8 grid gap-5 md:grid-cols-3">
-
-            {pets.map((pet) => (
-              <article
-                key={pet.nome}
-                className="overflow-hidden rounded-2xl bg-white shadow-sm transition hover:-translate-y-1 hover:shadow-md"
-              >
-                <img
-                  src={pet.imagem}
-                  alt={pet.nome}
-                  className="h-48 w-full object-cover"
-                />
-
-                <div className="p-4">
-
-                  <div className="flex items-center justify-between">
-                    <h3 className="font-bold text-zinc-800">
-                      {pet.nome}
-                    </h3>
-
-                    <button
-                      type="button"
-                      aria-label={`Favoritar ${pet.nome}`}
-                      className="text-destaque"
-                    >
-                      ♡
-                    </button>
-                  </div>
-
-                  <div className="mt-2 flex gap-2">
-                    <span className="rounded-full bg-zinc-100 px-2 py-1 text-[9px] text-zinc-600">
-                      {pet.especie}
-                    </span>
-
-                    <span className="rounded-full bg-blue-50 px-2 py-1 text-[9px] text-blue-600">
-                      {pet.idade}
-                    </span>
-                  </div>
-
-                  <Link
-                    to="/adocao"
-                    className="mt-4 block rounded-lg bg-marca px-4 py-2.5 text-center text-xs font-bold text-white"
-                  >
-                    Conhecer {pet.nome}
-                  </Link>
-
-                </div>
-              </article>
-            ))}
-
-          </div>
-
-          <div className="mt-8 text-center">
-            <Link
-              to="/adocao"
-              className="text-xs font-bold text-marca"
-            >
-              Ver todos os animais →
-            </Link>
-          </div>
-
+{pets.filter((pet) => pet.imagem).length > 0 && (
+  <section className="bg-[#f1f1f1] px-5 py-16 lg:px-14">
+    <div className="mx-auto max-w-7xl">
+      <div className="flex items-end justify-between gap-4">
+        <div>
+          <h2 className="text-2xl font-extrabold text-zinc-800">
+            Conheça nossos pets
+          </h2>
+          <p className="mt-1 text-sm text-zinc-500">
+            Eles estão à espera de uma família para chamar de sua.
+          </p>
         </div>
-      </section>
+
+        <Link
+          to="/adocao"
+          className="hidden text-xs font-semibold text-marca md:block"
+        >
+          Procure por espécie ↓
+        </Link>
+      </div>
+
+      <div className="mt-8 grid gap-5 sm:grid-cols-2 md:grid-cols-3">
+        {pets
+          .filter((pet) => pet.imagem)
+          .slice(0, 3)
+          .map((pet) => (
+            <AnimalCard key={pet.id} animal={pet} variant="home" />
+          ))}
+      </div>
+
+      <div className="mt-8 text-center">
+        <Link to="/adocao" className="text-xs font-bold text-marca">
+          Ver todos os animais →
+        </Link>
+      </div>
+    </div>
+  </section>
+)}
+
 
       {/* =====================================================
           SOBRE
