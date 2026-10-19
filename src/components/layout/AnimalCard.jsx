@@ -8,17 +8,17 @@ export default function AnimalCard({ animal, variant = "home" }) {
 
   return (
     <article
-      className={`overflow-hidden rounded-2xl border border-zinc-200 bg-white shadow-sm transition hover:-translate-y-1 hover:shadow-md ${
+      className={`flex h-full flex-col overflow-hidden rounded-2xl border border-zinc-200 bg-white shadow-sm transition hover:-translate-y-1 hover:shadow-md ${
         isHome ? "animal-card--home" : "animal-card--adocao"
       }`}
     >
       {/* Imagem e botão de favorito */}
-      <div className="relative">
+      <div className="relative shrink-0">
         <img
           src={animal.imagem}
           alt={`Foto de ${animal.nome}`}
           className={`w-full object-cover ${
-            isHome ? "h-48" : "h-56 md:h-48"
+            isHome ? "h-48" : "h-48"
           }`}
         />
 
@@ -54,7 +54,7 @@ export default function AnimalCard({ animal, variant = "home" }) {
       </div>
 
       {/* Informações do animal */}
-      <div className="p-4">
+      <div className="flex flex-1 flex-col p-4">
         <div className="flex items-center justify-between gap-2">
           <h3 className="text-lg font-bold text-zinc-800">
             {animal.nome}
@@ -75,17 +75,21 @@ export default function AnimalCard({ animal, variant = "home" }) {
 
         <div className="mt-3 flex flex-wrap gap-2">
           <span className="rounded-md bg-zinc-100 px-2.5 py-1 text-xs font-semibold text-zinc-700">
-            {animal.raca || "Raça não informada"}
+            {animal.raca || animal.tipo || "Raça não informada"}
           </span>
 
           <span className="rounded-md bg-zinc-100 px-2.5 py-1 text-xs font-semibold text-zinc-700">
-            {animal.idade}
+            {animal.idade || (
+              animal.anos != null
+                ? `${animal.anos} ${animal.anos === 1 ? "ano" : "anos"}`
+                : "Idade não informada"
+            )}
           </span>
         </div>
 
         {!isHome && (
           <>
-            <p className="mt-3 text-xs leading-5 text-zinc-500">
+            <p className="mt-3 flex-1 text-xs leading-5 text-zinc-500">
               {animal.descricao}
             </p>
 
