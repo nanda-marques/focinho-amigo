@@ -264,7 +264,6 @@ export default function Sponsorship() {
         </div>
       </section>
 
-      <PublicFooter />
     </>
   );
 }
