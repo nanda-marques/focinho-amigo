@@ -76,7 +76,7 @@ function App() {
           <Route path="/admin/publicacoes/:id/editar" element={<PublicationEditor />} />
           <Route path="/admin/publicacoes/:id/preview" element={<PublicationPreview />} />
 
-          <Route path="/admin/config" element={<Settings />} />
+          <Route path="/admin/configuracoes" element={<Settings />} />
         </Route>
       </Routes>
     </BrowserRouter>
