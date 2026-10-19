@@ -489,8 +489,6 @@ export default function Adoption() {
           </div>
         </div>
       </section>
-
-      <PublicFooter />
     </>
   );
 }
