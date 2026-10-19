@@ -11,6 +11,8 @@ export const pets = [
     imagem:
       "https://images.unsplash.com/photo-1552053831-71594a27632d?w=600",
     disponivelAdocao: true,
+    prioridadeApadrinhamento: false,
+    problemaSaude: "Necessita de acompanhamento veterinário contínuo",
   },
   {
     id: 2,
@@ -23,6 +25,8 @@ export const pets = [
     imagem:
       "https://images.unsplash.com/photo-1514888286974-6c03e2ca1dba?w=600",
     disponivelAdocao: true,
+    prioridadeApadrinhamento: false,
+    problemaSaude: "Necessita de acompanhamento veterinário contínuo",
   },
   
   {
@@ -37,6 +41,8 @@ export const pets = [
     tags: ["Brincalhão", "Carinhoso"],
     descricao: "Um filhote cheio de energia que adora brincar e passear.",
     imagem: "src/assets/images/pets/amora.png",
+    prioridadeApadrinhamento: false,
+    problemaSaude: "Necessita de acompanhamento veterinário contínuo",
   },
   {
     id: 8,
@@ -50,6 +56,8 @@ export const pets = [
     tags: ["Dócil", "Curiosa"],
     descricao: "Uma gatinha curiosa que gosta de explorar novos ambientes.",
     imagem: "src/assets/images/pets/amora.png",
+    prioridadeApadrinhamento: false,
+    problemaSaude: "Necessita de acompanhamento veterinário contínuo",
   },
   {
     id: 9,
@@ -63,6 +71,8 @@ export const pets = [
     tags: ["Amigável", "Ativo"],
     descricao: "Um cão sociável que gosta de companhia e caminhadas.",
     imagem: "src/assets/images/pets/amora.png",
+    prioridadeApadrinhamento: false,
+    problemaSaude: "Necessita de acompanhamento veterinário contínuo",
   },
   {
     id: 10,
@@ -76,6 +86,8 @@ export const pets = [
     tags: ["Tranquila", "Independente"],
     descricao: "Uma gatinha tranquila que aprecia ambientes confortáveis.",
     imagem: "src/assets/images/pets/amora.png",
+    prioridadeApadrinhamento: false,
+    problemaSaude: "Necessita de acompanhamento veterinário contínuo",
   },
   {
     id: 11,
@@ -89,6 +101,8 @@ export const pets = [
     tags: ["Leal", "Calmo"],
     descricao: "Um companheiro leal que merece uma família amorosa.",
     imagem: "src/assets/images/pets/amora.png",
+    prioridadeApadrinhamento: false,
+    problemaSaude: "Necessita de acompanhamento veterinário contínuo",
   },
   {
     id: 12,
@@ -102,6 +116,8 @@ export const pets = [
     tags: ["Carinhosa", "Calma"],
     descricao: "Uma gata adulta que adora descansar perto de pessoas.",
     imagem: "src/assets/images/pets/amora.png",
+    prioridadeApadrinhamento: false,
+    problemaSaude: "Necessita de acompanhamento veterinário contínuo",
   },
   {
     id: 13,
@@ -115,6 +131,8 @@ export const pets = [
     tags: ["Alegre", "Companheira"],
     descricao: "Uma cadelinha alegre que gosta de receber carinho.",
     imagem: "src/assets/images/pets/amora.png",
+    prioridadeApadrinhamento: true,
+    problemaSaude: "Necessita de acompanhamento veterinário contínuo",
   },
   {
     id: 14,
@@ -128,6 +146,8 @@ export const pets = [
     tags: ["Brincalhão", "Sociável"],
     descricao: "Um gato brincalhão que gosta de interagir com a família.",
     imagem: "src/assets/images/pets/amora.png",
+    prioridadeApadrinhamento: false,
+    problemaSaude: "Necessita de acompanhamento veterinário contínuo",
   },
   {
     id: 15,
@@ -141,6 +161,8 @@ export const pets = [
     tags: ["Dócil", "Sociável"],
     descricao: "Uma companheira dócil que adora estar perto das pessoas.",
     imagem: "src/assets/images/pets/amora.png",
+    prioridadeApadrinhamento: true,
+    problemaSaude: "Necessita de acompanhamento veterinário contínuo",
   },
   {
     id: 16,
@@ -154,6 +176,8 @@ export const pets = [
     tags: ["Curioso", "Ativo"],
     descricao: "Um gatinho curioso que gosta de brincar e explorar.",
     imagem: "src/assets/images/pets/amora.png",
+    prioridadeApadrinhamento: true,
+    problemaSaude: "Necessita de acompanhamento veterinário contínuo",
   },
   {
     id: 17,
@@ -167,6 +191,8 @@ export const pets = [
     tags: ["Tranquilo", "Leal"],
     descricao: "Um cão tranquilo que procura um lar cheio de carinho.",
     imagem: "src/assets/images/pets/amora.png",
+    prioridadeApadrinhamento: true,
+    problemaSaude: "Necessita de acompanhamento veterinário contínuo",
   },
   {
     id: 18,
@@ -180,5 +206,23 @@ export const pets = [
     tags: ["Carinhosa", "Brincalhona"],
     descricao: "Uma gata carinhosa que gosta de brincar e descansar.",
     imagem: "src/assets/images/pets/amora.png",
-  }
+    prioridadeApadrinhamento: true,
+    problemaSaude: "Necessita de acompanhamento veterinário contínuo",
+  },
+  {
+    id: 19,
+    nome: "Pirata",
+    tipo: "Cão",
+    raca: "Sem raça definida",
+    sexo: "M",
+    anos: 11,
+    idade: "11 anos",
+    porte: "Médio",
+    descricao:
+      "É um cão idoso que precisa de atenção e cuidados especiais.",
+    prioridadeApadrinhamento: true,
+    problemaSaude:
+      "Idade avançada e necessidade de exames veterinários de rotina",
+    imagem: "src/assets/images/pets/amora.png",
+}
 ];
