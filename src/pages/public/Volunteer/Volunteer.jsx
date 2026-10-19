@@ -210,7 +210,6 @@ export default function Volunteer() {
         </div>
       </section>
 
-      <PublicFooter />
     </>
   );
 }
