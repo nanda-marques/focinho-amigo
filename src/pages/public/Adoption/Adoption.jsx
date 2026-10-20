@@ -1,7 +1,8 @@
-
 import { useMemo, useState } from "react";
+import { useSearchParams } from "react-router-dom";
 import PublicFooter from "../../../components/layout/PublicFooter";
 import AnimalCard from "../../../components/layout/AnimalCard";
+import PetDetailsModal from "../../../components/adoption/PetDetailsModal";
 import { pets } from "../../../data/pets.js";
 
 // TODO: substituir pelo link real do formulário (Google Forms) da ONG
@@ -98,6 +99,23 @@ export default function Adoption() {
   const [idade, setIdade] = useState("todos");
   const [pagina, setPagina] = useState(1);
   const [aberta, setAberta] = useState(null);
+
+  // O pop-up é controlado pela URL: /adocao?animal=ID
+  const [searchParams, setSearchParams] = useSearchParams();
+  const idDaUrl = searchParams.get("animal");
+  const petAberto =
+    pets.find((p) => String(p.id ?? p.nome) === idDaUrl) ?? null;
+
+  const abrirPet = (pet) => setSearchParams({ animal: pet.id ?? pet.nome });
+  const fecharPet = () => setSearchParams({});
+
+  // "Quero Adotar" no pop-up: fecha e leva ao formulário
+  const irParaFormulario = () => {
+    fecharPet();
+    setTimeout(() => {
+      document.getElementById("formulario")?.scrollIntoView({ behavior: "smooth" });
+    }, 0);
+  };
 
   const filtrados = useMemo(
     () =>
@@ -253,6 +271,7 @@ export default function Adoption() {
                   key={pet.id ?? pet.nome}
                   animal={pet}
                   variant="adocao"
+                  onConhecer={abrirPet}
                 />
               ))}
             </div>
@@ -489,8 +508,13 @@ export default function Adoption() {
           </div>
         </div>
       </section>
-
-      <PublicFooter />
+      {petAberto && (
+        <PetDetailsModal
+          pet={petAberto}
+          onClose={fecharPet}
+          onAdopt={irParaFormulario}
+        />
+      )}
     </>
   );
 }

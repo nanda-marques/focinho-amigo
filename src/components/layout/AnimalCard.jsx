@@ -1,8 +1,7 @@
-
 import { useState } from "react";
 import { Link } from "react-router-dom";
 
-export default function AnimalCard({ animal, variant = "home" }) {
+export default function AnimalCard({ animal, variant = "home", onConhecer }) {
   const isHome = variant === "home";
   const [favorito, setFavorito] = useState(false);
 
@@ -99,12 +98,22 @@ export default function AnimalCard({ animal, variant = "home" }) {
           </>
         )}
 
-        <Link
-          to="/adocao"
-          className="mt-4 block rounded-lg bg-marca px-4 py-2.5 text-center text-xs font-bold text-white transition hover:opacity-90"
-        >
-          Conhecer {animal.nome}
-        </Link>
+        {onConhecer ? (
+          <button
+            type="button"
+            onClick={() => onConhecer(animal)}
+            className="mt-4 block w-full rounded-lg bg-marca px-4 py-2.5 text-center text-xs font-bold text-white transition hover:opacity-90"
+          >
+            Conhecer {animal.nome}
+          </button>
+        ) : (
+          <Link
+            to={animal.id != null ? `/adocao?animal=${animal.id}` : "/adocao"}
+            className="mt-4 block rounded-lg bg-marca px-4 py-2.5 text-center text-xs font-bold text-white transition hover:opacity-90"
+          >
+            Conhecer {animal.nome}
+          </Link>
+        )}
       </div>
     </article>
   );
