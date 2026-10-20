@@ -13,6 +13,27 @@ function validar(dados) {
   return null;
 }
 
+// ROTA PÚBLICA: Retorna APENAS as publicações com status "publicado"
+router.get("/", (_req, res) => {
+  const publicadas = publicacoes.filter((p) => p.status === "publicado");
+  publicadas.sort((a, b) => (b.atualizadoEm || "").localeCompare(a.atualizadoEm || ""));
+
+  res.json(publicadas);
+});
+
+// ROTA ADMIN: Retorna todas as publicações (publicadas, rascunhos, agendadas, etc)
+router.get("/admin", (_req, res) => {
+  res.json([...publicacoes].sort((a, b) => (b.atualizadoEm || "").localeCompare(a.atualizadoEm || "")));
+});
+
+// BUSCAR POR ID
+router.get("/:id", (req, res) => {
+  const publicacao = publicacoes.find((p) => p.id === req.params.id);
+  if (!publicacao) return res.status(404).json({ erro: "Publicação não encontrada." });
+  res.json(publicacao);
+});
+
+// CRIAR PUBLICAÇÃO
 router.post("/", (req, res) => {
   const erro = validar(req.body);
   if (erro) return res.status(400).json({ erro });
@@ -20,8 +41,9 @@ router.post("/", (req, res) => {
   const agora = new Date().toISOString();
   let statusFinal = req.body.status || "rascunho";
 
-  // Se a data de publicação for futura e o usuário tentou publicar, define como agendado
-  if (req.body.dataPublicacao && new Date(req.body.dataPublicacao) > new Date() && statusFinal === "publicado") {
+  // Compara apenas a parte da data (YYYY-MM-DD) para evitar problemas com horas
+  const hojeStr = new Date().toISOString().slice(0, 10);
+  if (req.body.dataPublicacao && req.body.dataPublicacao > hojeStr && statusFinal === "publicado") {
     statusFinal = "agendado";
   }
 
@@ -36,44 +58,37 @@ router.post("/", (req, res) => {
   res.status(201).json(publicacao);
 });
 
-router.get("/", (_req, res) => {
-  res.json(publicacoes.filter((p) => p.status === "publicado").sort((a, b) => (b.atualizadoEm || "").localeCompare(a.atualizadoEm || "")));
-});
-
-router.get("/admin", (_req, res) => {
-  res.json([...publicacoes].sort((a, b) => (b.atualizadoEm || "").localeCompare(a.atualizadoEm || "")));
-});
-
-router.get("/:id", (req, res) => {
-  const publicacao = publicacoes.find((p) => p.id === req.params.id);
-  if (!publicacao) return res.status(404).json({ erro: "Publicação não encontrada." });
-  res.json(publicacao);
-});
-
-router.post("/", (req, res) => {
-  const erro = validar(req.body);
-  if (erro) return res.status(400).json({ erro });
-  const agora = new Date().toISOString();
-  const publicacao = {
-    ...req.body, id: randomUUID(), status: req.body.status || "rascunho",
-    criadoEm: agora, atualizadoEm: agora,
-  };
-  publicacoes.unshift(publicacao);
-  res.status(201).json(publicacao);
-});
-
+// ATUALIZAR PUBLICAÇÃO
 router.put("/:id", (req, res) => {
   const indice = publicacoes.findIndex((p) => p.id === req.params.id);
   if (indice < 0) return res.status(404).json({ erro: "Publicação não encontrada." });
+
   const erro = validar(req.body);
   if (erro) return res.status(400).json({ erro });
-  publicacoes[indice] = { ...publicacoes[indice], ...req.body, id: req.params.id, atualizadoEm: new Date().toISOString() };
+
+  let statusFinal = req.body.status || publicacoes[indice].status;
+
+  const hojeStr = new Date().toISOString().slice(0, 10);
+  if (req.body.dataPublicacao && req.body.dataPublicacao > hojeStr && statusFinal === "publicado") {
+    statusFinal = "agendado";
+  }
+
+  publicacoes[indice] = { 
+    ...publicacoes[indice], 
+    ...req.body, 
+    id: req.params.id, 
+    status: statusFinal,
+    atualizadoEm: new Date().toISOString() 
+  };
+
   res.json(publicacoes[indice]);
 });
 
+// EXCLUIR PUBLICAÇÃO
 router.delete("/:id", (req, res) => {
   const indice = publicacoes.findIndex((p) => p.id === req.params.id);
   if (indice < 0) return res.status(404).json({ erro: "Publicação não encontrada." });
+  
   publicacoes.splice(indice, 1);
   res.status(204).end();
 });
