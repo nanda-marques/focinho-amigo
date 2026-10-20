@@ -260,6 +260,7 @@ export default function About() {
           </Link>
         </div>
       </section>
+
     </>
   );
 }
