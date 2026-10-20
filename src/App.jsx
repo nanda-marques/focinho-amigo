@@ -18,8 +18,9 @@ import Register from "./pages/admin/Register/Register";
 import Dashboard from "./pages/admin/Dashboard/Dashboard";
 import Animals from "./pages/admin/Animals/Animals";
 import Publications from "./pages/admin/Publications/Publications";
-import PublicationEditor from "./pages/admin/PublicationEditor/PublicationEditor";
-import Preview from "./pages/admin/Preview/Preview";
+import PublicationEditor from "./pages/admin/Publications/PublicationEditor";
+import PublicationPreview from "./pages/admin/Publications/PublicationPreview";
+
 import Settings from "./pages/admin/Settings/Settings";
 
 function PublicLayout() {
@@ -64,15 +65,18 @@ function App() {
         {/* ADMIN SEM MENU */}
         <Route path="/admin/login" element={<Login />} />
         <Route path="/admin/cadastro" element={<Register />} />
-        <Route path="/admin/preview" element={<Preview />} />
 
         {/* ADMIN COM MENU */}
         <Route element={<AdminLayout />}>
           <Route path="/admin/dashboard" element={<Dashboard />} />
           <Route path="/admin/animais" element={<Animals />} />
           <Route path="/admin/publicacoes" element={<Publications />} />
-          <Route path="/admin/publicacoes/criar-editar" element={<PublicationEditor />} />
-          <Route path="/admin/config" element={<Settings />} />
+          <Route path="/admin/publicacoes/nova" element={<PublicationEditor />} />
+          
+          <Route path="/admin/publicacoes/:id/editar" element={<PublicationEditor />} />
+          <Route path="/admin/publicacoes/:id/preview" element={<PublicationPreview />} />
+
+          <Route path="/admin/configuracoes" element={<Settings />} />
         </Route>
       </Routes>
     </BrowserRouter>
