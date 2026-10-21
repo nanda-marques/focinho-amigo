@@ -12,6 +12,42 @@ import {
   IconSyringe,
 } from "../layout/Icons";
 
+/** Detalhes detalhados de um animal. */
+export interface PetDetalhes {
+  fotos?: string[];
+  idadeEstimada?: string;
+  porte?: string;
+  peso?: string;
+  castrado?: string;
+  cor?: string;
+  temperamento?: string;
+  sobre?: string;
+  historico?: Array<{ tipo: string; titulo: string; texto: string }>;
+}
+
+/** Animal básico usado no modal. */
+export interface Pet {
+  id?: number;
+  nome: string;
+  tipo?: string;
+  sexo?: string;
+  descricao?: string;
+  raca?: string;
+  idade?: string;
+  anos?: number;
+  porte?: string;
+  imagem: string;
+  detalhes?: PetDetalhes;
+  tags?: string[];
+}
+
+/** Props do modal de detalhes de pet. */
+export interface PetDetailsModalProps {
+  pet: Pet;
+  onClose: () => void;
+  onAdopt: () => void;
+}
+
 const requisitos = [
   "Termo de responsabilidade",
   "Comprovante de residência",
@@ -19,14 +55,19 @@ const requisitos = [
   "Acompanhamento pós-adoção",
 ];
 
-const iconesHistorico = {
+const iconesHistorico: Record<string, React.ComponentType<{ className?: string }>> = {
   vacinacao: IconSyringe,
   vermifugacao: IconPill,
   castracao: IconScissors,
   microchip: IconChip,
 };
 
-function Campo({ label, children }) {
+interface CampoProps {
+  label: string;
+  children: React.ReactNode;
+}
+
+function Campo({ label, children }: CampoProps): React.JSX.Element {
   return (
     <div className="rounded-xl border border-zinc-200 bg-white px-3.5 py-2.5">
       <p className="text-xs font-semibold text-slate-500">{label}</p>
@@ -35,7 +76,12 @@ function Campo({ label, children }) {
   );
 }
 
-function Bloco({ titulo, children }) {
+interface BlocoProps {
+  titulo: string;
+  children: React.ReactNode;
+}
+
+function Bloco({ titulo, children }: BlocoProps): React.JSX.Element {
   return (
     <section className="rounded-xl border border-zinc-200 bg-white p-4 md:p-4">
       <h3 className="text-lg font-bold text-zinc-900">{titulo}</h3>
@@ -45,21 +91,16 @@ function Bloco({ titulo, children }) {
 }
 
 /**
- * Pop-up com os detalhes de um animal.
- * Props:
- *  - pet: objeto do animal (ver src/data/pets.js). Os campos em `pet.detalhes`
- *    são opcionais: seções sem dados simplesmente não aparecem.
- *  - onClose: fecha o pop-up
- *  - onAdopt: chamado ao clicar em "Quero Adotar"
+ * Pop-up com detalhes completos de um animal.
+ * Controla rolagem da página, fecha com Esc e exibe galeria.
  */
-export default function PetDetailsModal({ pet, onClose, onAdopt }) {
+export default function PetDetailsModal({ pet, onClose, onAdopt }: PetDetailsModalProps): React.JSX.Element {
   const [foto, setFoto] = useState(0);
   const d = pet.detalhes || {};
   const fotos = d.fotos?.length ? d.fotos : [pet.imagem];
 
-  // Fecha com Esc e trava a rolagem da página enquanto estiver aberto
   useEffect(() => {
-    const onKey = (e) => e.key === "Escape" && onClose();
+    const onKey = (e: KeyboardEvent) => e.key === "Escape" && onClose();
     document.addEventListener("keydown", onKey);
     const anterior = document.body.style.overflow;
     document.body.style.overflow = "hidden";
@@ -73,9 +114,6 @@ export default function PetDetailsModal({ pet, onClose, onAdopt }) {
   const proxima = () => setFoto((i) => (i + 1) % fotos.length);
 
   const femea = pet.sexo === "F";
-
-  // Funciona com os dados simples de pets.js: o que não existir em `detalhes`
-  // cai para os campos básicos do animal (raça, tags, descrição).
   const temperamento = d.temperamento || (pet.tags?.length ? pet.tags.join(" ▪ ") : null);
   const sobre = d.sobre || pet.descricao;
 
@@ -152,9 +190,9 @@ export default function PetDetailsModal({ pet, onClose, onAdopt }) {
               {fotos.length > 1 && (
                 <div className="mt-4 hidden items-center justify-between md:flex md:max-w-[360px]">
                   <div className="flex items-center gap-2">
-                    {fotos.map((src, i) => (
+                    {fotos.map((_, i) => (
                       <span
-                        key={`${i}-${src}`}
+                        key={i}
                         className={`h-2 rounded-full transition-all ${
                           i === foto ? "w-6 bg-marca" : "w-2 bg-slate-300"
                         }`}

@@ -1,7 +1,19 @@
 import { useEffect, useState } from "react";
 import { NavLink } from "react-router-dom";
 
-const links = [
+/** Tipo de link de navegação. */
+interface LinkItem {
+  to: string;
+  label: string;
+}
+
+/** Tipo de opção do filtro de cores. */
+interface FiltroItem {
+  value: string;
+  label: string;
+}
+
+const links: LinkItem[] = [
   { to: "/", label: "Início" },
   { to: "/sobre-nos", label: "Sobre Nós" },
   { to: "/adocao", label: "Adoção" },
@@ -12,7 +24,7 @@ const links = [
   { to: "/campanhas-e-noticias", label: "Eventos" },
 ];
 
-const filtros = [
+const filtros: FiltroItem[] = [
   { value: "padrao", label: "Cores padrão" },
   { value: "protanopia", label: "Protanopia (vermelho)" },
   { value: "deuteranopia", label: "Deuteranopia (verde)" },
@@ -20,8 +32,8 @@ const filtros = [
   { value: "monocromia", label: "Escala de cinza" },
 ];
 
-// Matrizes de correção de cores (daltonização), aplicadas via SVG
-const matrizes = {
+/** Matrizes de correção de cores para daltonismo. */
+const matrizes: Record<string, string> = {
   protanopia:
     "1 0 0 0 0  0.478897 0.476911 0.044192 0 0  0.597282 -0.688692 1.09141 0 0  0 0 0 1 0",
   deuteranopia:
@@ -30,15 +42,18 @@ const matrizes = {
     "0.996687 -0.483957 0.48727 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 1 0",
 };
 
-function aplicarFiltro(valor) {
+/** Aplica filtro de cor ao elemento raiz via CSS filter e SVG. */
+function aplicarFiltro(valor: string): void {
   const root = document.getElementById("root");
+  if (!root) return;
   if (valor === "padrao") root.style.filter = "";
   else if (valor === "monocromia") root.style.filter = "grayscale(1)";
   else root.style.filter = `url(#filtro-${valor})`;
 }
 
-export default function PublicMenu() {
-  const [filtro, setFiltro] = useState(
+/** Menu público com navegação, logo e seletor de filtro de daltonismo. */
+export default function PublicMenu(): React.JSX.Element {
+  const [filtro, setFiltro] = useState<string>(
     () => localStorage.getItem("filtro-cores") || "padrao"
   );
   const [menuAberto, setMenuAberto] = useState(false);
@@ -48,7 +63,7 @@ export default function PublicMenu() {
     localStorage.setItem("filtro-cores", filtro);
   }, [filtro]);
 
-  const linkClass = ({ isActive }) =>
+  const linkClass = ({ isActive }: { isActive: boolean }): string =>
     `whitespace-nowrap text-sm font-semibold transition-colors hover:text-marca ${
       isActive ? "text-marca" : "text-zinc-900"
     }`;
@@ -87,17 +102,17 @@ export default function PublicMenu() {
 
       <div className="mx-auto flex max-w-7xl items-center justify-between gap-6 px-5 py-3 lg:px-14">
         {/* Logo */}
-<NavLink to="/" className="flex shrink-0 items-center gap-2">
-  <img src="src/assets/logo.svg" alt="" className="h-11 w-auto" />
-  <span className="flex flex-col leading-none">
-    <strong className="whitespace-nowrap text-xl font-bold text-marca">
-      Focinho Amigo
-    </strong>
-    <small className="mt-1 whitespace-nowrap text-[9px] font-bold uppercase tracking-wide text-destaque">
-      Nos ajude a salvar vidas.
-    </small>
-  </span>
-</NavLink>
+        <NavLink to="/" className="flex shrink-0 items-center gap-2">
+          <img src="src/assets/logo.svg" alt="" className="h-11 w-auto" />
+          <span className="flex flex-col leading-none">
+            <strong className="whitespace-nowrap text-xl font-bold text-marca">
+              Focinho Amigo
+            </strong>
+            <small className="mt-1 whitespace-nowrap text-[9px] font-bold uppercase tracking-wide text-destaque">
+              Nos ajude a salvar vidas.
+            </small>
+          </span>
+        </NavLink>
 
         {/* Links (desktop) */}
         <nav aria-label="Menu principal" className="hidden items-center gap-6 lg:flex">

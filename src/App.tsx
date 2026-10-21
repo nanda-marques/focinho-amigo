@@ -20,10 +20,12 @@ import Animals from "./pages/admin/Animals/Animals";
 import Publications from "./pages/admin/Publications/Publications";
 import PublicationEditor from "./pages/admin/Publications/PublicationEditor";
 import PublicationPreview from "./pages/admin/Publications/PublicationPreview";
-
 import Settings from "./pages/admin/Settings/Settings";
 
-function PublicLayout() {
+/**
+ * Layout público: cabeçalho, conteúdo e rodapé.
+ */
+function PublicLayout(): React.JSX.Element {
   return (
     <>
       <PublicMenu />
@@ -35,7 +37,10 @@ function PublicLayout() {
   );
 }
 
-function AdminLayout() {
+/**
+ * Layout administrativo: menu lateral + área de conteúdo.
+ */
+function AdminLayout(): React.JSX.Element {
   return (
     <div className="flex min-h-screen bg-[#f0f0f0]">
       <AdminMenu />
@@ -46,7 +51,11 @@ function AdminLayout() {
   );
 }
 
-function App() {
+/**
+ * Componente raiz da aplicação.
+ * Define as rotas públicas e administrativas usando react-router-dom.
+ */
+function App(): React.JSX.Element {
   return (
     <BrowserRouter>
       <Routes>
@@ -72,10 +81,8 @@ function App() {
           <Route path="/admin/animais" element={<Animals />} />
           <Route path="/admin/publicacoes" element={<Publications />} />
           <Route path="/admin/publicacoes/nova" element={<PublicationEditor />} />
-          
           <Route path="/admin/publicacoes/:id/editar" element={<PublicationEditor />} />
           <Route path="/admin/publicacoes/:id/preview" element={<PublicationPreview />} />
-
           <Route path="/admin/configuracoes" element={<Settings />} />
         </Route>
       </Routes>

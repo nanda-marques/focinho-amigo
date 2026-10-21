@@ -1,5 +1,7 @@
-// Ícones SVG simples compartilhados (traço, herdam a cor via currentColor).
-const base = {
+import React from "react";
+
+/** Propriedades padrão de cada ícone SVG. */
+const base: React.SVGProps<SVGSVGElement> = {
   "aria-hidden": true,
   viewBox: "0 0 24 24",
   fill: "none",
@@ -9,14 +11,22 @@ const base = {
   strokeLinejoin: "round",
 };
 
-const make = (paths) =>
-  function Icon({ className = "h-5 w-5" }) {
-    return (
-      <svg {...base} className={className}>
-        {paths}
-      </svg>
-    );
-  };
+/** Tipo de props aceitas por cada componente de ícone. */
+export interface IconProps {
+  className?: string;
+}
+
+type MakeIcon = (paths: React.ReactNode) => React.FC<IconProps>;
+
+const make: MakeIcon = (paths) => {
+  const Component: React.FC<IconProps> = ({ className = "h-5 w-5" }) => (
+    <svg {...base} className={className}>
+      {paths}
+    </svg>
+  );
+  Component.displayName = "Icon";
+  return Component;
+};
 
 export const IconHome = make(
   <>
@@ -48,9 +58,7 @@ export const IconUsers = make(
   </>
 );
 
-export const IconStar = make(
-  <path d="m12 3 2.7 5.6 6.1.9-4.4 4.3 1 6.1L12 17l-5.4 2.9 1-6.1L3.2 9.5l6.1-.9z" />
-);
+export const IconStar = make(<path d="m12 3 2.7 5.6 6.1.9-4.4 4.3 1 6.1L12 17l-5.4 2.9 1-6.1L3.2 9.5l6.1-.9z" />);
 
 export const IconShare = make(
   <>

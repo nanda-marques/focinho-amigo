@@ -503,4 +503,4 @@ export default function Animais() {
       </main>
     </div>
   );
-}
+}// Convertido de JSX para TSX - verifique tipos conforme necessidade

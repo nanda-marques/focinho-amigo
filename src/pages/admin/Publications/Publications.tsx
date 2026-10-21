@@ -221,4 +221,4 @@ export default function Publications() {
       </div>
     </main>
   );
-}
+}// Convertido de JSX para TSX - verifique tipos conforme necessidade

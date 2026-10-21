@@ -1,8 +1,7 @@
 import { Link } from "react-router-dom";
 import PublicFooter from "../../../components/layout/PublicFooter";
 
-// Imagens ficam na pasta public: /images/sobre-nos/<arquivo>
-
+/** Propriedades SVG de ícones internos. */
 const iconProps = {
   "aria-hidden": true,
   viewBox: "0 0 24 24",
@@ -12,7 +11,7 @@ const iconProps = {
   strokeWidth: 2,
   strokeLinecap: "round",
   strokeLinejoin: "round",
-};
+} as const;
 
 const IconeCoracao = () => (
   <svg {...iconProps}>
@@ -33,66 +32,77 @@ const IconeEscudo = () => (
   </svg>
 );
 
-const pilares = [
+interface Pilar {
+  titulo: string;
+  texto: string;
+  textoMobile?: string;
+  Icone: () => React.JSX.Element;
+}
+
+const pilares: Pilar[] = [
   {
     titulo: "Prevenção e Conscientização",
-    texto:
-      "Promovemos campanhas e eventos para impedir maus-tratos e estimular o amor e o respeito aos animais, além de acompanhar a legislação de proteção animal.",
-    textoMobile:
-      "Promovemos campanhas e eventos para impedir maus-tratos e estimular o amor e o respeito aos animais.",
+    texto: "Promovemos campanhas e eventos para impedir maus-tratos e estimular o amor e o respeito aos animais, além de acompanhar a legislação de proteção animal.",
+    textoMobile: "Promovemos campanhas e eventos para impedir maus-tratos e estimular o amor e o respeito aos animais.",
     Icone: IconeCoracao,
   },
   {
     titulo: "Assistência Social e Veterinária",
-    texto:
-      "Oferecemos assistência médico-veterinária e campanhas de castração também para famílias de baixa renda, além do tratamento dos animais resgatados.",
-    textoMobile:
-      "Oferecemos assistência médico-veterinária e campanhas de castração também para famílias de baixa renda.",
+    texto: "Oferecemos assistência médico-veterinária e campanhas de castração também para famílias de baixa renda, além do tratamento dos animais resgatados.",
+    textoMobile: "Oferecemos assistência médico-veterinária e campanhas de castração também para famílias de baixa renda.",
     Icone: IconeOlho,
   },
   {
     titulo: "Rede de Apoio",
-    texto:
-      "Apoiamos outros abrigos e ONGs que recolhem e cuidam de animais abandonados, com o trabalho de 35 voluntários.",
+    texto: "Apoiamos outros abrigos e ONGs que recolhem e cuidam de animais abandonados, com o trabalho de 35 voluntários.",
     Icone: IconeEscudo,
   },
 ];
 
-const marcos = [
+interface Marco {
+  ano: string;
+  titulo: string;
+  texto: string;
+}
+
+const marcos: Marco[] = [
   {
     ano: "2018",
     titulo: "Fundação",
-    texto:
-      "A Organização da Sociedade Civil de Interesse Público Focinho Amigo Indaiatuba começou como um grupo de proteção em 29 de junho de 2018.",
+    texto: "A Organização da Sociedade Civil de Interesse Público Focinho Amigo Indaiatuba começou como um grupo de proteção em 29 de junho de 2018.",
   },
   {
     ano: "2020",
     titulo: "Formalização",
-    texto:
-      "Nos formalizamos como OSCIP e também assumimos nossa primeira sede onde também funciona um bazar que hoje é 80% da nossa renda.",
+    texto: "Nos formalizamos como OSCIP e também assumimos nossa primeira sede onde também funciona um bazar que hoje é 80% da nossa renda.",
   },
   {
     ano: "2026",
     titulo: "20k seguidores no Instagram",
-    texto:
-      "Cada pessoa que está aqui faz parte disso. Cada curtida, cada compartilhamento, cada apoio — tudo isso ajuda nossos resgates, nossas adoções e os animais que precisam.",
+    texto: "Cada pessoa que está aqui faz parte disso. Cada curtida, cada compartilhamento, cada apoio — tudo isso ajuda nossos resgates, nossas adoções e os animais que precisam.",
   },
   {
     ano: "2026",
     titulo: "Atualmente",
-    texto:
-      "Hoje contamos com 35 voluntários e 2 funcionários dedicados a cuidar de cerca de 50 cães e gatos entre hotel e lares temporários.",
+    texto: "Hoje contamos com 35 voluntários e 2 funcionários dedicados a cuidar de cerca de 50 cães e gatos entre hotel e lares temporários.",
   },
 ];
 
-const equipe = [
+interface Equipe {
+  nome: string;
+  cargo: string;
+  imagem: string;
+}
+
+const equipe: Equipe[] = [
   { nome: "Dra. Beatriz Lima", cargo: "Veterinária Chefe", imagem: "/images/sobre-nos/beatriz.jpg" },
   { nome: "Carlos Eduardo", cargo: "Coordenador de Resgates", imagem: "/images/sobre-nos/carlos.jpg" },
   { nome: "Gabriela Santos", cargo: "Comunicação & Eventos", imagem: "/images/sobre-nos/gabriela.jpg" },
   { nome: "Luciana Rocha", cargo: "Cuidadora Especialista", imagem: "/images/sobre-nos/luciana.jpg" },
 ];
 
-export default function About() {
+/** Página "Sobre Nós" com história, pilares, linha do tempo e equipe. */
+export default function About(): React.JSX.Element {
   return (
     <>
       {/* =====================================================
@@ -107,13 +117,7 @@ export default function About() {
           <div className="max-w-2xl text-white">
             <h1 className="text-3xl font-extrabold md:text-4xl">Nossa História</h1>
             <p className="mt-3 text-sm leading-6 text-white/90 md:text-base">
-              Nossa visão é criar um mundo sem abandono e maus-tratos.
-              Temos o objetivo de resgatar, reabilitar e encaminhar para adoção
-              animais retirados das ruas e de situações de maus-tratos
-              <span className="hidden md:inline">
-                , além de ajudar famílias carentes com assistência veterinária
-              </span>
-              .
+              Nossa visão é criar um mundo sem abandono e maus-tratos. Temos o objetivo de resgatar, reabilitar e encaminhar para adoção animais retirados das ruas e de situações de maus-tratos.
             </p>
           </div>
         </div>
@@ -124,19 +128,13 @@ export default function About() {
       ====================================================== */}
       <section className="bg-white px-5 py-10 lg:px-14 lg:py-14">
         <div className="mx-auto max-w-6xl">
-          <h2 className="text-center text-2xl font-extrabold text-zinc-800 md:text-3xl">
-            Nossos Pilares
-          </h2>
+          <h2 className="text-center text-2xl font-extrabold text-zinc-800 md:text-3xl">Nossos Pilares</h2>
           <p className="mt-2 text-center text-sm text-zinc-500">
             A conduta e os ideais que guiam cada passo da nossa associação protetora.
           </p>
-
           <div className="mt-8 grid gap-4 md:grid-cols-3 md:items-start md:gap-5">
             {pilares.map(({ titulo, texto, textoMobile, Icone }) => (
-              <article
-                key={titulo}
-                className="rounded-2xl border border-zinc-200 bg-[#f8f9fb] p-6"
-              >
+              <article key={titulo} className="rounded-2xl border border-zinc-200 bg-[#f8f9fb] p-6">
                 <div className="flex h-12 w-12 items-center justify-center rounded-full bg-marca text-white">
                   <Icone />
                 </div>
@@ -147,9 +145,7 @@ export default function About() {
                       <span className="md:hidden">{textoMobile}</span>
                       <span className="hidden md:inline">{texto}</span>
                     </>
-                  ) : (
-                    texto
-                  )}
+                  ) : texto}
                 </p>
               </article>
             ))}
@@ -162,31 +158,21 @@ export default function About() {
       ====================================================== */}
       <section className="bg-[#f1f1f1] px-5 py-12 lg:px-14 lg:py-16">
         <div className="mx-auto max-w-6xl">
-          <h2 className="text-center text-2xl font-extrabold text-zinc-800 md:text-3xl">
-            Linha do Tempo
-          </h2>
+          <h2 className="text-center text-2xl font-extrabold text-zinc-800 md:text-3xl">Linha do Tempo</h2>
           <p className="mt-2 hidden text-center text-sm text-zinc-500 md:block">
             Principais marcos e conquistas desde o início da nossa jornada.
           </p>
-
-          {/* Mobile: cards empilhados. Desktop: zigue-zague com conectores. */}
           <ol className="mx-auto mt-8 flex max-w-3xl flex-col gap-4 md:mt-10 md:gap-12">
             {marcos.map((m, i) => {
               const direita = i % 2 === 1;
               const temProximo = i < marcos.length - 1;
               return (
-                <li
-                  key={m.titulo}
-                  className={`relative md:w-[46%] ${direita ? "md:ml-auto" : ""}`}
-                >
+                <li key={m.titulo} className={`relative md:w-[46%] ${direita ? "md:ml-auto" : ""}`}>
                   <div className="relative z-10 rounded-xl bg-white p-5 shadow-sm">
                     <span className="text-sm font-bold text-marca">{m.ano}</span>
                     <h3 className="mt-1 text-lg font-bold text-zinc-800">{m.titulo}</h3>
-                    <p className="mt-2 text-sm leading-6 text-zinc-500 md:text-xs md:leading-5">
-                      {m.texto}
-                    </p>
+                    <p className="mt-2 text-sm leading-6 text-zinc-500 md:text-xs md:leading-5">{m.texto}</p>
                   </div>
-
                   {temProximo && (
                     <span
                       aria-hidden="true"
@@ -209,29 +195,20 @@ export default function About() {
       ====================================================== */}
       <section className="bg-white px-5 py-12 lg:px-14 lg:py-16">
         <div className="mx-auto max-w-6xl">
-          <h2 className="text-center text-2xl font-extrabold text-zinc-800 md:text-3xl">
-            Quem Faz Acontecer
-          </h2>
+          <h2 className="text-center text-2xl font-extrabold text-zinc-800 md:text-3xl">Quem Faz Acontecer</h2>
           <p className="mt-2 text-center text-sm text-zinc-500">
             Nossos dedicados heróis que doam amor e cuidado diário aos peludinhos.
           </p>
-
           <div className="mt-8 grid grid-cols-2 gap-3 md:grid-cols-4 md:gap-5">
             {equipe.map((p) => (
               <article
                 key={p.nome}
                 className="overflow-hidden rounded-xl border border-zinc-200 bg-white"
               >
-                <img
-                  src={p.imagem}
-                  alt={p.nome}
-                  className="h-40 w-full object-cover md:h-52"
-                />
+                <img src={p.imagem} alt={p.nome} className="h-40 w-full object-cover md:h-52" />
                 <div className="p-3 md:p-4">
                   <h3 className="text-sm font-bold text-zinc-800 md:text-base">{p.nome}</h3>
-                  <p className="mt-0.5 text-[11px] font-semibold text-marca md:text-xs">
-                    {p.cargo}
-                  </p>
+                  <p className="mt-0.5 text-[11px] font-semibold text-marca md:text-xs">{p.cargo}</p>
                 </div>
               </article>
             ))}
@@ -246,21 +223,18 @@ export default function About() {
         <div className="mx-auto max-w-2xl">
           <h2 className="text-2xl font-extrabold md:text-3xl">Faça parte dessa história</h2>
           <p className="mt-3 text-sm leading-6 text-white/90">
-            Doar seu tempo e suas habilidades é uma das formas mais bonitas de
-            mudar vidas. Temos vagas para voluntários de limpeza, cuidados
-            veterinários, eventos, redes sociais e muito mais. Venha somar com
-            a gente!
+            Doar seu tempo e suas habilidades é uma das formas mais bonitas de mudar vidas.
           </p>
           <Link
             to="/voluntariado"
-            className="mt-6 block rounded-lg bg-destaque px-6 py-3 text-sm font-bold text-zinc-900 transition-colors hover:bg-destaque-escura md:inline-block"
+            className="mt-6 inline-block rounded-lg bg-destaque px-6 py-3 text-sm font-bold text-zinc-900 transition-colors hover:bg-destaque-escura"
           >
-            <span className="md:hidden">Quero me Candidatar</span>
-            <span className="hidden md:inline">Quero me Candidatar como Voluntário</span>
+            Quero me Candidatar como Voluntário
           </Link>
         </div>
       </section>
 
+      <PublicFooter />
     </>
   );
 }

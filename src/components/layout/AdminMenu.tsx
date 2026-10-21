@@ -9,9 +9,15 @@ import {
   LuSettings,
   LuLogOut,
 } from "react-icons/lu";
-import logo from "../../assets/image 3.svg"; // ajuste o caminho conforme a pasta do arquivo
+import logo from "../../assets/image 3.svg";
 
-const links = [
+interface LinkItem {
+  to: string;
+  label: string;
+  icone: React.ComponentType<{ className?: string }>;
+}
+
+const links: LinkItem[] = [
   { to: "/admin/dashboard", label: "Dashboard", icone: LuLayoutDashboard },
   { to: "/admin/publicacoes", label: "Publicações", icone: LuFileText },
   { to: "/admin/campanhas", label: "Campanhas", icone: LuMegaphone },
@@ -23,12 +29,12 @@ const links = [
 const itemClass =
   "flex w-full items-center gap-3.5 rounded-lg px-4 py-3 text-[15px] font-bold text-white transition-colors";
 
-export default function AdminMenu() {
+/** Menu lateral administrativo com navegação e logout. */
+export default function AdminMenu(): React.JSX.Element {
   const [aberto, setAberto] = useState(false);
   const navigate = useNavigate();
 
-  function sair() {
-    // Limpe aqui a sessão já existente no projeto (token, contexto de auth etc.)
+  function sair(): void {
     localStorage.removeItem("token");
     navigate("/admin/login");
   }
