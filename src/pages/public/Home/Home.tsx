@@ -2,6 +2,7 @@ import { Link } from "react-router-dom";
 import { pets } from "../../../data/pets";
 import AnimalCard from "../../../components/layout/AnimalCard";
 import type { Animal } from "../../../components/layout/AnimalCard";
+import Newsletter from "../newsletter/newsletter";
 
 /** Tipo de item de forma de ajuda. */
 interface FormaAjuda {
@@ -47,6 +48,7 @@ const formasAjuda: FormaAjuda[] = [
 export default function Home(): React.JSX.Element {
   return (
     <main>
+       <Newsletter />
       {/* =====================================================
           HERO
       ====================================================== */}
