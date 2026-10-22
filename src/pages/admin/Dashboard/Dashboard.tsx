@@ -1,27 +1,65 @@
 import { useEffect, useMemo, useState } from "react";
+import type { JSX } from "react";
 import { useNavigate } from "react-router-dom";
-import {
-  LuFileText,
-  LuMegaphone,
-  LuCalendar,
-  LuHeart,
-  LuPlus,
-  LuArrowRight,
-  LuEye,
-  LuPencil,
-  LuTrash2,
-  LuNewspaper,
-} from "react-icons/lu";
+import type { IconType } from "react-icons";
+import { FiEye, FiEdit, FiTrash2, FiPlus } from "react-icons/fi";
+import { LuFileText, LuMegaphone, LuCalendar, LuHeart } from "react-icons/lu";
 
+import AdminHeader from "../../../components/layout/adminHeader";
 import { publicacoesApi } from "../../../services/publicacoesApi";
 
-function formatarData(data) {
-  if (!data) return "—";
+interface Publicacao {
+  id: number | string;
+  titulo?: string;
+  categoria?: string;
+  status?: string;
+  dataPublicacao?: string;
+  data?: string;
+  createdAt?: string;
+}
 
-  const d = new Date(`${data}T12:00:00`);
+type StatusPublicacao = "Publicado" | "Agendado" | "Rascunho";
 
-  if (Number.isNaN(d.getTime())) return data;
+const cardClass =
+  "bg-white border border-[#e2e2e2] rounded-[12px] shadow-[0_2px_3px_rgb(0_0_0/22%)]";
 
+const statusClass: Record<StatusPublicacao, string> = {
+  Publicado: "text-[#10b981] bg-[#e3f8ef]",
+  Agendado: "text-[#3b82f6] bg-[#e5eefd]",
+  Rascunho: "text-[#667b9b] bg-[#ebeef2]",
+};
+
+const CATEGORIAS = [
+  { nome: "Campanhas", cor: "#2174b7" },
+  { nome: "Animais", cor: "#ff7a18" },
+  { nome: "Notícias", cor: "#4285f4" },
+  { nome: "Eventos", cor: "#00a878" },
+  { nome: "Projetos", cor: "#8657e8" },
+];
+
+/* ------------------------- Helpers ------------------------- */
+
+function normalizar(texto = ""): string {
+  return texto
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase();
+}
+
+function extrairDataISO(p: Publicacao): string {
+  const bruta = p.dataPublicacao || p.data || p.createdAt;
+  if (!bruta) return "";
+  // retorna apenas YYYY-MM-DD quando possível
+  if (/^\d{4}-\d{2}-\d{2}/.test(bruta)) return bruta.slice(0, 10);
+  const d = new Date(bruta);
+  if (Number.isNaN(d.getTime())) return "";
+  return d.toISOString().slice(0, 10);
+}
+
+function formatarData(iso?: string | null): string {
+  if (!iso) return "—";
+  const d = new Date(`${iso}T12:00:00`);
+  if (Number.isNaN(d.getTime())) return iso;
   return new Intl.DateTimeFormat("pt-BR", {
     day: "2-digit",
     month: "short",
@@ -31,47 +69,87 @@ function formatarData(data) {
     .replace(".", "");
 }
 
-function normalizarCategoria(categoria = "") {
-  return categoria
-    .normalize("NFD")
-    .replace(/[\u0300-\u036f]/g, "")
-    .toLowerCase();
+function hojeISO(): string {
+  const hoje = new Date();
+  hoje.setHours(0, 0, 0, 0);
+  return hoje.toISOString().slice(0, 10);
 }
 
-function obterDataPublicacao(publicacao) {
+function somarDias(iso: string, dias: number): string {
+  const d = new Date(`${iso}T12:00:00`);
+  d.setDate(d.getDate() + dias);
+  return d.toISOString().slice(0, 10);
+}
+
+function normalizarStatus(status?: string): StatusPublicacao {
+  const s = normalizar(status);
+  if (s === "publicado") return "Publicado";
+  if (s === "agendado") return "Agendado";
+  return "Rascunho";
+}
+
+/* ------------------------- StatCard ------------------------- */
+
+interface StatCardProps {
+  icone: IconType;
+  valor: number;
+  titulo: string;
+  descricao: string;
+  corIcone: string;
+  fundoIcone: string;
+}
+
+function StatCard({
+  icone: Icone,
+  valor,
+  titulo,
+  descricao,
+  corIcone,
+  fundoIcone,
+}: StatCardProps): JSX.Element {
   return (
-    publicacao.dataPublicacao ||
-    publicacao.data ||
-    publicacao.createdAt ||
-    null
+    <div className={`${cardClass} flex items-center gap-[16px] p-[22px]`}>
+      <span
+        className="w-[48px] h-[48px] shrink-0 flex items-center justify-center rounded-full"
+        style={{ color: corIcone, backgroundColor: fundoIcone }}
+      >
+        <Icone className="w-[22px] h-[22px]" />
+      </span>
+      <div className="min-w-0">
+        <strong className="block text-[28px] leading-[1.1] font-extrabold">
+          {valor}
+        </strong>
+        <span className="block mt-[4px] text-[14px] font-semibold text-[#3d4b63]">
+          {titulo}
+        </span>
+        <small className="block mt-[2px] text-[11.5px] text-[#667b9b]">
+          {descricao}
+        </small>
+      </div>
+    </div>
   );
 }
 
-function estaPublicada(publicacao) {
-  return (
-    publicacao.status === "publicado" 
-  );
-}
+/* ------------------------- Dashboard ------------------------- */
 
-export default function Dashboard() {
+export default function Dashboard(): JSX.Element {
   const navigate = useNavigate();
 
-  const [publicacoes, setPublicacoes] = useState([]);
-  const [carregando, setCarregando] = useState(true);
-  const [erro, setErro] = useState("");
+  const [publicacoes, setPublicacoes] = useState<Publicacao[]>([]);
+  const [carregando, setCarregando] = useState<boolean>(true);
+  const [erro, setErro] = useState<string>("");
 
-  async function carregarDashboard() {
+  async function carregar(): Promise<void> {
     setCarregando(true);
     setErro("");
-
     try {
       const dados = await publicacoesApi.listarAdmin();
-
       setPublicacoes(Array.isArray(dados) ? dados : []);
-    } catch (e) {
+    } catch (e: unknown) {
       setErro(
-        e.message ||
-          "Não foi possível carregar os dados do dashboard. Confira se o backend está em execução."
+        e instanceof Error
+          ? e.message
+          : "Não foi possível carregar os dados do dashboard."
       );
     } finally {
       setCarregando(false);
@@ -79,568 +157,339 @@ export default function Dashboard() {
   }
 
   useEffect(() => {
-    carregarDashboard();
+    carregar();
   }, []);
 
-  /*
-   * Estatísticas
-   */
-  const estatisticas = useMemo(() => {
-    const campanhas = publicacoes.filter((p) =>
-      normalizarCategoria(p.categoria).includes("campanha")
+  const resumo = useMemo(() => {
+    const hoje = hojeISO();
+    const em30Dias = somarDias(hoje, 30);
+    const ha7Dias = somarDias(hoje, -7);
+
+    const publicadas = publicacoes.filter(
+      (p) => normalizarStatus(p.status) === "Publicado"
     );
 
-    const eventos = publicacoes.filter((p) =>
-      normalizarCategoria(p.categoria).includes("evento")
-    );
+    const eventosProximos = publicacoes.filter((p) => {
+      const categoria = normalizar(p.categoria);
+      const status = normalizarStatus(p.status);
+      const data = extrairDataISO(p);
+      return (
+        categoria.includes("evento") &&
+        status !== "Rascunho" &&
+        !!data &&
+        data >= hoje &&
+        data <= em30Dias
+      );
+    });
 
-    const noticias = publicacoes.filter((p) =>
-      normalizarCategoria(p.categoria).includes("noticia")
-    );
-
-    const hoje = new Date();
-    hoje.setHours(0, 0, 0, 0);
-
-    const trintaDias = new Date(hoje);
-    trintaDias.setDate(trintaDias.getDate() + 30);
-
-    const eventosProximos = eventos.filter((p) => {
-      const data = obterDataPublicacao(p);
-
-      if (!data) return false;
-
-      const dataEvento = new Date(`${data}T12:00:00`);
-
-      return dataEvento >= hoje && dataEvento <= trintaDias;
+    const noticiasRecentes = publicadas.filter((p) => {
+      const categoria = normalizar(p.categoria);
+      const data = extrairDataISO(p);
+      return categoria.includes("noticia") && !!data && data >= ha7Dias && data <= hoje;
     });
 
     return {
-      total: publicacoes.length,
-
-      campanhasAtivas: campanhas.filter((p) =>
-        estaPublicada(p)
+      totalPublicacoes: publicacoes.length,
+      campanhasAtivas: publicadas.filter((p) =>
+        normalizar(p.categoria).includes("campanha")
       ).length,
-
       eventosProximos: eventosProximos.length,
-
-      noticiasRecentes: noticias.length,
+      noticiasRecentes: noticiasRecentes.length,
     };
   }, [publicacoes]);
 
-  /*
-   * Publicações recentes
-   */
   const publicacoesRecentes = useMemo(() => {
     return [...publicacoes]
-      .sort((a, b) => {
-        const dataA = new Date(
-          `${obterDataPublicacao(a) || "1900-01-01"}T12:00:00`
-        );
-
-        const dataB = new Date(
-          `${obterDataPublicacao(b) || "1900-01-01"}T12:00:00`
-        );
-
-        return dataB - dataA;
-      })
+      .sort((a, b) => extrairDataISO(b).localeCompare(extrairDataISO(a)))
       .slice(0, 5);
   }, [publicacoes]);
 
-  /*
-   * Categorias
-   */
   const categorias = useMemo(() => {
-    const configuracao = [
-      {
-        nome: "Campanhas",
-        chave: "campanha",
-        cor: "bg-[#1976bd]",
-      },
-      {
-        nome: "Animais",
-        chave: "animal",
-        cor: "bg-[#ff7a18]",
-      },
-      {
-        nome: "Notícias",
-        chave: "noticia",
-        cor: "bg-[#4285f4]",
-      },
-      {
-        nome: "Eventos",
-        chave: "evento",
-        cor: "bg-[#00a878]",
-      },
-      {
-        nome: "Projetos",
-        chave: "projeto",
-        cor: "bg-[#8657e8]",
-      },
-    ];
-
-    return configuracao.map((categoria) => {
-      const quantidade = publicacoes.filter((p) =>
-        normalizarCategoria(p.categoria).includes(categoria.chave)
-      ).length;
-
-      return {
-        ...categoria,
-        quantidade,
-      };
-    });
+    return CATEGORIAS.map((c) => ({
+      ...c,
+      posts: publicacoes.filter((p) =>
+        normalizar(p.categoria).includes(normalizar(c.nome).replace(/s$/, ""))
+      ).length,
+    }));
   }, [publicacoes]);
 
-  const maiorQuantidade = Math.max(
-    ...categorias.map((categoria) => categoria.quantidade),
-    1
-  );
+  const maiorQuantidade = Math.max(...categorias.map((c) => c.posts), 1);
 
-  /*
-   * Excluir publicação
-   */
-  async function excluirPublicacao(publicacao) {
-    const confirmou = window.confirm(
-      `Deseja excluir "${publicacao.titulo}"?`
-    );
-
-    if (!confirmou) return;
-
+  async function excluirPublicacao(publicacao: Publicacao): Promise<void> {
+    if (!window.confirm(`Excluir a publicação "${publicacao.titulo}"?`)) return;
     try {
       await publicacoesApi.excluir(publicacao.id);
-      await carregarDashboard();
-    } catch (e) {
+      await carregar();
+    } catch (e: unknown) {
       setErro(
-        e.message || "Não foi possível excluir a publicação."
+        e instanceof Error ? e.message : "Não foi possível excluir a publicação."
       );
     }
   }
 
-  function classeStatus(status) {
-    if (status === "publicado") {
-      return "bg-emerald-50 text-emerald-600";
-    }
-
-    if (status === "agendado") {
-      return "bg-blue-50 text-blue-600";
-    }
-
-    return "bg-slate-100 text-slate-500";
+  function verPublicacao(p: Publicacao): void {
+    navigate(`/admin/publicacoes/${p.id}/preview`);
   }
 
-  function textoStatus(status) {
-    const statusMap = {
-      publicado: "Publicado",
-      agendado: "Agendado",
-      rascunho: "Rascunho",
-    };
-
-    return statusMap[status] || status || "—";
-  }
-
-  /*
-   * Card de estatística
-   */
-  function CardEstatistica({
-    icone: Icone,
-    valor,
-    titulo,
-    descricao,
-    tipo,
-  }) {
-    const estilos = {
-      azul: {
-        fundo: "bg-blue-50",
-        icone: "text-[#1976bd]",
-      },
-      amarelo: {
-        fundo: "bg-amber-50",
-        icone: "text-[#ffb700]",
-      },
-      verde: {
-        fundo: "bg-emerald-50",
-        icone: "text-emerald-500",
-      },
-      roxo: {
-        fundo: "bg-purple-50",
-        icone: "text-purple-500",
-      },
-    };
-
-    const estilo = estilos[tipo];
-
-    return (
-      <article className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm transition-shadow hover:shadow-md">
-        <div className="flex items-center gap-4">
-          <div
-            className={`grid h-12 w-12 shrink-0 place-items-center rounded-full ${estilo.fundo}`}
-          >
-            <Icone className={`h-6 w-6 ${estilo.icone}`} />
-          </div>
-
-          <div className="min-w-0">
-            <p className="text-3xl font-extrabold leading-none text-[#202b40]">
-              {carregando ? "—" : valor}
-            </p>
-
-            <p className="mt-2 text-sm font-bold text-[#61718f]">
-              {titulo}
-            </p>
-
-            <p className="mt-1 text-xs text-slate-500">
-              {descricao}
-            </p>
-          </div>
-        </div>
-      </article>
-    );
+  function editarPublicacao(p: Publicacao): void {
+    navigate(`/admin/publicacoes/${p.id}/editar`);
   }
 
   return (
-    <main className="min-h-screen bg-[#f6f6f6] font-['Inter',Arial,sans-serif] text-[#202b40]">
-      {/* Header */}
-      <header className="flex min-h-[76px] items-center justify-between border-b border-slate-200 bg-white px-6 py-4 md:px-8">
-        <h1 className="text-2xl font-extrabold tracking-tight">
-          Dashboard
-        </h1>
+    <div className="flex-1 min-w-0 min-h-screen flex flex-col font-['Inter',Arial,sans-serif] text-[#202b3e] bg-[#f0f0f0] box-border *:box-border">
+      <AdminHeader titulo="Dashboard" />
 
-        <div className="flex items-center gap-3">
-          <div className="grid h-10 w-10 place-items-center overflow-hidden rounded-full bg-slate-200 text-sm font-bold text-slate-600">
-            MS
-          </div>
-
-          <div className="hidden sm:block">
-            <p className="text-sm font-bold">
-              Mariana Silva
-            </p>
-
-            <p className="text-xs text-slate-500">
-              Gestora de Projetos
-            </p>
-          </div>
-        </div>
-      </header>
-
-      {/* Conteúdo */}
-      <div className="px-5 py-8 md:px-8">
+      <main className="flex-1 flex flex-col gap-[28px] p-[18px] sm:p-[24px] lg:p-[32px]">
         {erro && (
           <div
             role="alert"
-            className="mb-6 rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-700"
+            className="rounded-[8px] border border-red-200 bg-red-50 p-[12px] text-[13px] text-red-700"
           >
             {erro}
           </div>
         )}
 
-        {/* Cards superiores */}
-        <section className="grid grid-cols-1 gap-5 sm:grid-cols-2 xl:grid-cols-4">
-          <CardEstatistica
+        {/* Cards de resumo */}
+        <section
+          aria-label="Resumo"
+          className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-[16px]"
+        >
+          <StatCard
             icone={LuFileText}
-            valor={estatisticas.total}
+            valor={carregando ? 0 : resumo.totalPublicacoes}
             titulo="Total Publicações"
-            descricao="+4% este mês"
-            tipo="azul"
+            descricao="Total cadastrado"
+            corIcone="#2174b7"
+            fundoIcone="#e8f3fd"
           />
-
-          <CardEstatistica
+          <StatCard
             icone={LuMegaphone}
-            valor={estatisticas.campanhasAtivas}
+            valor={carregando ? 0 : resumo.campanhasAtivas}
             titulo="Campanhas Ativas"
             descricao="Arrecadações em andamento"
-            tipo="amarelo"
+            corIcone="#ffb800"
+            fundoIcone="#fff6db"
           />
-
-          <CardEstatistica
+          <StatCard
             icone={LuCalendar}
-            valor={estatisticas.eventosProximos}
+            valor={carregando ? 0 : resumo.eventosProximos}
             titulo="Eventos Próximos"
             descricao="Próximos 30 dias"
-            tipo="verde"
+            corIcone="#10b981"
+            fundoIcone="#e3f8ef"
           />
-
-          <CardEstatistica
-            icone={LuNewspaper}
-            valor={estatisticas.noticiasRecentes}
+          <StatCard
+            icone={LuHeart}
+            valor={carregando ? 0 : resumo.noticiasRecentes}
             titulo="Notícias Recentes"
-            descricao="Publicações de notícias"
-            tipo="roxo"
+            descricao="Publicadas esta semana"
+            corIcone="#8b5cf6"
+            fundoIcone="#f0eafd"
           />
         </section>
 
         {/* Ações rápidas */}
-        <section className="mt-8">
-          <h2 className="mb-4 text-xl font-extrabold">
+        <section aria-labelledby="titulo-acoes">
+          <h2
+            id="titulo-acoes"
+            className="m-0 mb-[16px] text-[20px] leading-[1.25] tracking-[-0.3px] font-extrabold"
+          >
             Ações Rápidas
           </h2>
 
-          <div className="grid grid-cols-1 gap-5 lg:grid-cols-3">
-            {/* Nova publicação */}
-            <article className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
-              <h3 className="text-base font-extrabold">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-[16px]">
+            <div className={`${cardClass} p-[22px]`}>
+              <h3 className="m-0 mb-[8px] text-[17px] font-extrabold">
                 Nova Publicação
               </h3>
-
-              <p className="mt-2 text-sm text-slate-500">
-                Crie campanhas ou notícias para o portal 
+              <p className="m-0 mb-[12px] text-[#667b9b] text-[13.5px]">
+                Crie campanhas ou notícias para o portal público
               </p>
-
               <button
                 type="button"
-                onClick={() =>
-                  navigate("/admin/publicacoes/nova")
-                }
-                className="mt-3 inline-flex items-center gap-2 rounded-lg bg-[#1976bd] px-4 py-2 text-sm font-bold text-white transition hover:bg-[#125f9b]"
+                onClick={() => navigate("/admin/publicacoes/nova")}
+                className="h-[32px] px-[14px] inline-flex items-center gap-[6px] text-white font-inherit text-[13px] font-bold bg-[#2174b7] border-0 rounded-[6px] cursor-pointer transition-colors duration-150 hover:bg-[#1767a8]"
               >
-                <LuPlus size={16} />
+                <FiPlus className="w-[14px] h-[14px]" />
                 Criar Artigo
               </button>
-            </article>
+            </div>
 
-            {/* Animais */}
-            <article className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
-              <h3 className="text-base font-extrabold">
+            <div className={`${cardClass} p-[22px]`}>
+              <h3 className="m-0 mb-[8px] text-[17px] font-extrabold">
                 Gerenciar Animais
               </h3>
-
-              <p className="mt-2 text-sm text-slate-500">
-                Veja, adicione ou edite os animais da ONG  
+              <p className="m-0 mb-[12px] text-[#667b9b] text-[13.5px]">
+                Veja, adicione ou edite os animais da ONG
               </p>
-
               <button
                 type="button"
-                onClick={() =>
-                  navigate("/admin/animais")
-                }
-                className="mt-3 inline-flex items-center gap-2 rounded-lg bg-[#ffb700] px-4 py-2 text-sm font-bold text-white transition hover:bg-[#e5a500]"
+                onClick={() => navigate("/admin/animais")}
+                className="h-[32px] px-[14px] text-white font-inherit text-[13px] font-bold bg-[#ffb800] border-0 rounded-[6px] cursor-pointer transition-colors duration-150 hover:bg-[#e6a600]"
               >
                 Ir para Animais
-                <LuArrowRight size={15} />
               </button>
-            </article>
+            </div>
 
-            {/* Publicações */}
-            <article className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
-              <h3 className="text-base font-extrabold">
+            <div className={`${cardClass} p-[22px]`}>
+              <h3 className="m-0 mb-[8px] text-[17px] font-extrabold">
                 Ver Publicações
               </h3>
-
-              <p className="mt-2 text-sm text-slate-500">
+              <p className="m-0 mb-[12px] text-[#667b9b] text-[13.5px]">
                 Edite, remova ou agende suas postagens
               </p>
-
               <button
                 type="button"
-                onClick={() =>
-                  navigate("/admin/publicacoes")
-                }
-                className="mt-3 inline-flex items-center gap-2 rounded-lg bg-slate-100 px-4 py-2 text-sm font-bold text-[#202b40] transition hover:bg-slate-200"
+                onClick={() => navigate("/admin/publicacoes")}
+                className="h-[32px] px-[14px] text-[#202b3e] font-inherit text-[13px] font-bold bg-[#eef2f6] border-0 rounded-[6px] cursor-pointer transition-colors duration-150 hover:bg-[#e2e8ef]"
               >
                 Acessar Lista
-                <LuArrowRight size={15} />
               </button>
-            </article>
+            </div>
           </div>
         </section>
 
-        {/* Parte inferior */}
-        <section className="mt-8 grid grid-cols-1 gap-6 xl:grid-cols-[minmax(0,2fr)_minmax(320px,0.8fr)]">
+        {/* Tabela + categorias */}
+        <div className="grid grid-cols-1 xl:grid-cols-[minmax(0,1fr)_332px] gap-[16px] items-start">
           {/* Publicações recentes */}
-          <article className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
-            <div className="flex items-center justify-between border-b border-slate-100 px-6 py-5">
-              <h2 className="text-xl font-extrabold">
-                Publicações Recentes
-              </h2>
+          <section
+            className={`${cardClass} p-[24px]`}
+            aria-labelledby="titulo-recentes"
+          >
+            <h2
+              id="titulo-recentes"
+              className="m-0 mb-[16px] text-[20px] leading-[1.25] tracking-[-0.3px] font-extrabold"
+            >
+              Publicações Recentes
+            </h2>
 
-              <button
-                type="button"
-                onClick={() =>
-                  navigate("/admin/publicacoes")
-                }
-                className="text-sm font-bold text-[#1976bd] hover:underline"
-              >
-                Ver todas
-              </button>
-            </div>
-
-            {carregando ? (
-              <div className="p-12 text-center text-sm text-slate-500">
-                Carregando publicações...
-              </div>
-            ) : publicacoesRecentes.length === 0 ? (
-              <div className="p-12 text-center">
-                <p className="font-bold">
-                  Nenhuma publicação encontrada
-                </p>
-
-                <p className="mt-2 text-sm text-slate-500">
-                  Crie sua primeira publicação para começar.
-                </p>
-
-                <button
-                  type="button"
-                  onClick={() =>
-                    navigate("/admin/publicacoes/nova")
-                  }
-                  className="mt-4 inline-flex items-center gap-2 rounded-lg bg-[#1976bd] px-4 py-2 text-sm font-bold text-white"
-                >
-                  <LuPlus size={16} />
-                  Nova publicação
-                </button>
-              </div>
-            ) : (
-              <div className="overflow-x-auto">
-                <table className="w-full min-w-[700px] border-collapse text-left text-sm">
-                  <thead className="border-b border-slate-200 bg-slate-50 text-xs font-bold text-slate-500">
+            <div className="overflow-x-auto border border-[#e8edf3] rounded-[4px]">
+              <table className="w-full min-w-[620px] border-collapse text-left text-[13.5px]">
+                <thead>
+                  <tr className="bg-[#f7f9fb] text-[#667b9b] text-[12px] font-bold">
+                    <th className="py-[14px] px-[16px] font-bold">Título</th>
+                    <th className="py-[14px] px-[16px] font-bold">Categoria</th>
+                    <th className="py-[14px] px-[16px] font-bold">Data</th>
+                    <th className="py-[14px] px-[16px] font-bold">Status</th>
+                    <th className="py-[14px] px-[16px] font-bold">Ações</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {carregando ? (
                     <tr>
-                      <th className="px-5 py-3">
-                        Título
-                      </th>
-
-                      <th className="px-3 py-3">
-                        Categoria
-                      </th>
-
-                      <th className="px-3 py-3">
-                        Data
-                      </th>
-
-                      <th className="px-3 py-3">
-                        Status
-                      </th>
-
-                      <th className="px-4 py-3 text-center">
-                        Ações
-                      </th>
-                    </tr>
-                  </thead>
-
-                  <tbody className="divide-y divide-slate-200">
-                    {publicacoesRecentes.map((publicacao) => (
-                      <tr
-                        key={publicacao.id}
-                        className="transition hover:bg-slate-50"
+                      <td
+                        colSpan={5}
+                        className="py-[32px] px-[16px] text-center text-[#667b9b]"
                       >
-                        <td className="max-w-[330px] px-5 py-4">
-                          <p className="truncate font-bold text-slate-800">
+                        Carregando publicações...
+                      </td>
+                    </tr>
+                  ) : publicacoesRecentes.length === 0 ? (
+                    <tr>
+                      <td
+                        colSpan={5}
+                        className="py-[32px] px-[16px] text-center text-[#667b9b]"
+                      >
+                        Nenhuma publicação cadastrada ainda.
+                      </td>
+                    </tr>
+                  ) : (
+                    publicacoesRecentes.map((publicacao) => {
+                      const status = normalizarStatus(publicacao.status);
+                      return (
+                        <tr
+                          key={publicacao.id}
+                          className="border-t border-[#e8edf3]"
+                        >
+                          <td className="py-[16px] px-[16px] font-bold">
                             {publicacao.titulo || "Sem título"}
-                          </p>
-                        </td>
-
-                        <td className="whitespace-nowrap px-3 py-4 text-slate-600">
-                          {publicacao.categoria || "—"}
-                        </td>
-
-                        <td className="whitespace-nowrap px-3 py-4 text-slate-500">
-                          {formatarData(
-                            obterDataPublicacao(publicacao)
-                          )}
-                        </td>
-
-                        <td className="px-3 py-4">
-                          <span
-                            className={`whitespace-nowrap rounded-md px-2.5 py-1 text-[11px] font-bold ${classeStatus(
-                              publicacao.status
-                            )}`}
-                          >
-                            {textoStatus(publicacao.status)}
-                          </span>
-                        </td>
-
-                        <td className="px-4 py-4">
-                          <div className="flex items-center justify-center gap-1 text-slate-500">
-                            <button
-                              type="button"
-                              title="Pré-visualizar"
-                              onClick={() =>
-                                navigate(
-                                  `/admin/publicacoes/${publicacao.id}/preview`
-                                )
-                              }
-                              className="rounded-md p-1.5 transition hover:bg-slate-100 hover:text-[#1976bd]"
+                          </td>
+                          <td className="py-[16px] px-[16px] text-[#3d4b63]">
+                            {publicacao.categoria || "—"}
+                          </td>
+                          <td className="py-[16px] px-[16px] text-[#667b9b] whitespace-nowrap">
+                            {formatarData(extrairDataISO(publicacao))}
+                          </td>
+                          <td className="py-[16px] px-[16px]">
+                            <span
+                              className={`inline-block px-[8px] py-[3px] text-[11.5px] font-bold rounded-[4px] ${statusClass[status]}`}
                             >
-                              <LuEye size={17} />
-                            </button>
+                              {status}
+                            </span>
+                          </td>
+                          <td className="py-[16px] px-[16px]">
+                            <div className="flex items-center gap-[10px] text-[#687d9a]">
+                              <button
+                                type="button"
+                                aria-label={`Ver ${publicacao.titulo}`}
+                                onClick={() => verPublicacao(publicacao)}
+                                className="p-0 flex bg-transparent border-0 text-inherit cursor-pointer hover:text-[#2174b7]"
+                              >
+                                <FiEye className="w-[17px] h-[17px]" />
+                              </button>
+                              <button
+                                type="button"
+                                aria-label={`Editar ${publicacao.titulo}`}
+                                onClick={() => editarPublicacao(publicacao)}
+                                className="p-0 flex bg-transparent border-0 text-inherit cursor-pointer hover:text-[#2174b7]"
+                              >
+                                <FiEdit className="w-[17px] h-[17px]" />
+                              </button>
+                              <button
+                                type="button"
+                                aria-label={`Excluir ${publicacao.titulo}`}
+                                onClick={() => excluirPublicacao(publicacao)}
+                                className="p-0 flex bg-transparent border-0 text-inherit cursor-pointer hover:text-[#c0392b]"
+                              >
+                                <FiTrash2 className="w-[17px] h-[17px]" />
+                              </button>
+                            </div>
+                          </td>
+                        </tr>
+                      );
+                    })
+                  )}
+                </tbody>
+              </table>
+            </div>
+          </section>
 
-                            <button
-                              type="button"
-                              title="Editar"
-                              onClick={() =>
-                                navigate(
-                                  `/admin/publicacoes/${publicacao.id}/editar`
-                                )
-                              }
-                              className="rounded-md p-1.5 transition hover:bg-slate-100 hover:text-[#1976bd]"
-                            >
-                              <LuPencil size={17} />
-                            </button>
-
-                            <button
-                              type="button"
-                              title="Excluir"
-                              onClick={() =>
-                                excluirPublicacao(publicacao)
-                              }
-                              className="rounded-md p-1.5 transition hover:bg-red-50 hover:text-red-600"
-                            >
-                              <LuTrash2 size={17} />
-                            </button>
-                          </div>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            )}
-          </article>
-
-          {/* Categorias */}
-          <article className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
-            <h2 className="text-xl font-extrabold">
+          {/* Postagens por categoria */}
+          <section
+            className={`${cardClass} p-[24px]`}
+            aria-labelledby="titulo-categorias"
+          >
+            <h2
+              id="titulo-categorias"
+              className="m-0 mb-[16px] text-[20px] leading-[1.25] tracking-[-0.3px] font-extrabold"
+            >
               Postagens por Categoria
             </h2>
 
-            <div className="mt-6 space-y-5">
-              {categorias.map((categoria) => {
-                const porcentagem =
-                  categoria.quantidade === 0
-                    ? 0
-                    : Math.max(
-                        8,
-                        (categoria.quantidade /
-                          maiorQuantidade) *
-                          100
-                      );
-
-                return (
-                  <div key={categoria.nome}>
-                    <div className="mb-2 flex items-center justify-between gap-3">
-                      <span className="text-sm font-bold text-[#202b40]">
-                        {categoria.nome}
-                      </span>
-
-                      <span className="text-xs text-slate-500">
-                        {categoria.quantidade}{" "}
-                        {categoria.quantidade === 1
-                          ? "post"
-                          : "posts"}
-                      </span>
-                    </div>
-
-                    <div className="h-2 overflow-hidden rounded-full bg-slate-100">
-                      <div
-                        className={`h-full rounded-full ${categoria.cor} transition-all duration-500`}
-                        style={{
-                          width: `${porcentagem}%`,
-                        }}
-                      />
-                    </div>
+            <ul className="m-0 p-0 list-none flex flex-col gap-[14px]">
+              {categorias.map((categoria) => (
+                <li key={categoria.nome}>
+                  <div className="flex items-center justify-between mb-[6px] text-[13.5px]">
+                    <strong className="font-bold">{categoria.nome}</strong>
+                    <span className="text-[#667b9b] text-[12.5px]">
+                      {categoria.posts} posts
+                    </span>
                   </div>
-                );
-              })}
-            </div>
-          </article>
-        </section>
-      </div>
-    </main>
+                  <div className="h-[8px] bg-[#eef2f6] rounded-full overflow-hidden">
+                    <div
+                      className="h-full rounded-full transition-all duration-300"
+                      style={{
+                        width: `${(categoria.posts / maiorQuantidade) * 100}%`,
+                        backgroundColor: categoria.cor,
+                      }}
+                    />
+                  </div>
+                </li>
+              ))}
+            </ul>
+          </section>
+        </div>
+      </main>
+    </div>
   );
 }
