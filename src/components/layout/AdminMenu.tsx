@@ -7,7 +7,8 @@ import {
   LuSettings,
   LuLogOut,
 } from "react-icons/lu";
-import logo from "../../assets/image 3.svg";
+
+import logo from "../../assets/logo_pequena.svg";
 
 interface LinkItem {
   to: string;
