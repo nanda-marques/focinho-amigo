@@ -1,33 +1,36 @@
 const API_URL = import.meta.env.VITE_API_URL ?? "http://localhost:3000";
 
+// Tipos
 
-export type StatusPublicacao = "publicado" | "agendado" | "rascunho";
+export type StatusPublicacao =
+  | "publicado"
+  | "agendado"
+  | "rascunho"
+  | "arquivado";
 
 export interface Publicacao {
-  id: number;
+  id: string;                    
   titulo: string;
   categoria?: string;
-  status?: StatusPublicacao;
+  status?: "publicado" | "agendado" | "rascunho" | "arquivado";
   dataPublicacao?: string;
-  data?: string;
-  createdAt?: string;
   conteudo?: string;
+  descricao?: string;
   imagem?: string;
   resumo?: string;
+  autor?: string;
+  destaque?: boolean;
+  urgente?: boolean;
+  criadoEm?: string;             // ← backend manda "criadoEm", não "createdAt"
+  atualizadoEm?: string;
 }
 
-/** Payload aceito ao criar/editar (id opcional — presente = PUT). */
-export interface PublicacaoPayload {
-  id?: number;
-  titulo: string;
-  categoria?: string;
-  status?: StatusPublicacao;
-  dataPublicacao?: string;
-  data?: string;
-  conteudo?: string;
-  imagem?: string;
-  resumo?: string;
-}
+export type PublicacaoPayload = Omit<
+  Publicacao,
+  "id" | "criadoEm" | "atualizadoEm"
+> & {
+  id?: string;
+};
 
 interface ErroApi {
   erro?: string;
@@ -46,11 +49,11 @@ async function requisicao<T>(
 ): Promise<T> {
   const token = localStorage.getItem("token");
 
+  // Content-Type só quando há body e ele não é FormData.
   const headers: Record<string, string> = {
-    // Só define Content-Type quando NÃO for FormData
-    ...(opcoes.body instanceof FormData
-      ? {}
-      : { "Content-Type": "application/json" }),
+    ...(opcoes.body && !(opcoes.body instanceof FormData)
+      ? { "Content-Type": "application/json" }
+      : {}),
     ...(token ? { Authorization: `Bearer ${token}` } : {}),
     ...opcoes.headers,
   };
@@ -65,7 +68,7 @@ async function requisicao<T>(
     if (!resposta.ok) {
       throw new Error(`Erro ${resposta.status} em ${caminho}`);
     }
-    return null as T;
+    return undefined as T;
   }
 
   const texto = await resposta.text();
@@ -91,7 +94,7 @@ async function requisicao<T>(
   return dados as T;
 }
 
-// API
+/* ------------------------------ API ------------------------------ */
 
 export const publicacoesApi = {
   listarAdmin: (): Promise<Publicacao[]> =>
@@ -100,14 +103,20 @@ export const publicacoesApi = {
   listarPublicadas: (): Promise<Publicacao[]> =>
     requisicao<Publicacao[]>("/api/publicacoes"),
 
-  buscar: (id: number | string): Promise<Publicacao> =>
-    requisicao<Publicacao>(`/api/publicacoes/${id}`),
+  buscar: (id: number | string): Promise<Publicacao> => {
+    if (id === undefined || id === null || id === "") {
+      return Promise.reject(new Error("ID da publicação não informado."));
+    }
+    return requisicao<Publicacao>(`/api/publicacoes/${id}`);
+  },
 
   salvar: (dados: PublicacaoPayload): Promise<Publicacao> =>
     requisicao<Publicacao>(
-      dados.id ? `/api/publicacoes/${dados.id}` : "/api/publicacoes",
+      dados.id != null
+        ? `/api/publicacoes/${dados.id}`
+        : "/api/publicacoes",
       {
-        method: dados.id ? "PUT" : "POST",
+        method: dados.id != null ? "PUT" : "POST",
         body: JSON.stringify(dados),
       }
     ),

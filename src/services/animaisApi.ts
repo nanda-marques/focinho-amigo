@@ -1,20 +1,24 @@
 export interface Animal {
-  id: number | string;
+  id: string;                 
   nome: string;
   especie?: string;
   raca?: string;
   idade?: string;
+  anos?: number;
   porte?: string;
   peso?: string;
+  sexo?: string;
   castracao?: string;
   statusCastracao?: string;
   temperamento?: string;
   cor?: string;
   foto?: string;
   data?: string;
+  criadoEm?: string;
+  atualizadoEm?: string;
 }
 
-export type NovoAnimal = Omit<Animal, "id" | "data">;
+export type NovoAnimal = Omit<Animal, "id" | "criadoEm" | "atualizadoEm">;
 
 const BASE_URL = "http://localhost:3000/api/animais"; 
 
