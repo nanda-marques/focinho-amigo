@@ -1,4 +1,3 @@
-
 export interface Publicacao {
   id: string | number;
   titulo: string;
