@@ -324,7 +324,7 @@ export default function Publications(): JSX.Element {
                     <th className="px-2 py-3.5">Categoria</th>
                     <th className="px-2 py-3.5">Data</th>
                     <th className="px-2 py-3.5">Status</th>
-                    <th className="px-2 py-3.5 text-center">Destaque</th>
+                    <th className="px-2 py-3.5 text-center">Fixar</th>
                     <th className="px-2 py-3.5 text-center">Ações</th>
                   </tr>
                 </thead>
