@@ -3,8 +3,6 @@ import { NavLink, useNavigate } from "react-router-dom";
 import {
   LuLayoutDashboard,
   LuFileText,
-  LuMegaphone,
-  LuCalendar,
   LuHeart,
   LuSettings,
   LuLogOut,
@@ -20,8 +18,6 @@ interface LinkItem {
 const links: LinkItem[] = [
   { to: "/admin/dashboard", label: "Dashboard", icone: LuLayoutDashboard },
   { to: "/admin/publicacoes", label: "Publicações", icone: LuFileText },
-  { to: "/admin/campanhas", label: "Campanhas", icone: LuMegaphone },
-  { to: "/admin/eventos", label: "Eventos", icone: LuCalendar },
   { to: "/admin/animais", label: "Animais", icone: LuHeart },
   { to: "/admin/configuracoes", label: "Configurações", icone: LuSettings },
 ];
@@ -53,44 +49,75 @@ export default function AdminMenu(): React.JSX.Element {
 
       {/* Fundo escuro (mobile) */}
       {aberto && (
-        <div onClick={() => setAberto(false)} className="fixed inset-0 z-40 bg-black/40 lg:hidden" />
+        <div
+          onClick={() => setAberto(false)}
+          className="fixed inset-0 z-40 bg-black/40 lg:hidden"
+        />
       )}
 
+      {/* Menu lateral */}
       <aside
-        className={`fixed inset-y-0 left-0 z-50 flex w-[260px] flex-col bg-[#2174b7] px-6 py-8 font-['Inter',Arial,sans-serif] transition-transform lg:sticky lg:top-0 lg:h-screen lg:translate-x-0 ${
+        className={`fixed inset-y-0 left-0 z-50 flex width: 260px; flex-col bg-[#2174b7] px-6 py-8 font-['Inter',Arial,sans-serif] transition-transform lg:sticky lg:top-0 lg:h-screen lg:translate-x-0 ${
           aberto ? "translate-x-0" : "-translate-x-full"
         }`}
       >
         {/* Logo */}
-        <NavLink to="/admin/dashboard" className="mb-10 flex items-center gap-2.5 text-white no-underline">
-          <img src={logo} alt="" className="h-[50px] w-[54px] object-contain" />
+        <NavLink
+          to="/admin/dashboard"
+          className="mb-10 flex items-center gap-2.5 text-white no-underline"
+          onClick={() => setAberto(false)}
+        >
+          <img
+            src={logo}
+            alt=""
+            className="h-12 w-[54px] object-contain"
+          />
+
           <span className="flex flex-col leading-tight">
-            <strong className="text-[17px] font-extrabold">Focinho Amigo</strong>
-            <small className="text-[11px] font-semibold text-[#ffb800]">Painel Admin</small>
+            <strong className="text-[17px] font-extrabold">
+              Focinho Amigo
+            </strong>
+            <small className="text-xs font-semibold text-destaque">
+              Painel Admin
+            </small>
           </span>
         </NavLink>
 
-        {/* Links */}
-        <nav aria-label="Menu administrativo" className="flex flex-col gap-1.5">
+        {/* Links de navegação */}
+        <nav
+          aria-label="Menu administrativo"
+          className="flex flex-col gap-1.5"
+        >
           {links.map(({ to, label, icone: Icone }) => (
             <NavLink
               key={to}
               to={to}
               onClick={() => setAberto(false)}
               className={({ isActive }) =>
-                `${itemClass} ${isActive ? "bg-white/20" : "hover:bg-white/10"}`
+                `${itemClass} ${
+                  isActive ? "bg-white/20" : "hover:bg-white/10"
+                }`
               }
             >
               {({ isActive }) => (
                 <>
-                  <Icone className={`h-5 w-5 shrink-0 ${isActive ? "text-[#ffb800]" : ""}`} />
+                  <Icone
+                    className={`h-5 w-5 shrink-0 ${
+                      isActive ? "text-destaque" : ""
+                    }`}
+                  />
                   {label}
                 </>
               )}
             </NavLink>
           ))}
 
-          <button type="button" onClick={sair} className={`${itemClass} cursor-pointer hover:bg-white/10`}>
+          {/* Sair */}
+          <button
+            type="button"
+            onClick={sair}
+            className={`${itemClass} cursor-pointer hover:bg-white/10`}
+          >
             <LuLogOut className="h-5 w-5 shrink-0" />
             Sair
           </button>

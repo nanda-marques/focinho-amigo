@@ -39,14 +39,19 @@ function PublicLayout(): React.JSX.Element {
 
 /**
  * Layout administrativo: menu lateral + área de conteúdo.
+ *
+ * - A área de conteúdo é uma <div>, e não um <main>, porque o index.css aplica
+ *   padding: 40px em todo <main>. Cada tela cuida do próprio espaçamento.
+ * - A classe "admin-area" zera esse padding global para qualquer <main> dentro
+ *   do admin (veja a regra correspondente no index.css).
  */
 function AdminLayout(): React.JSX.Element {
   return (
-    <div className="flex min-h-screen bg-[#f0f0f0]">
+    <div className="admin-area flex min-h-screen bg-[#f0f0f0]">
       <AdminMenu />
-      <main className="min-w-0 flex-1 p-6 pt-16 lg:pt-6">
+      <div className="min-w-0 flex-1">
         <Outlet />
-      </main>
+      </div>
     </div>
   );
 }
