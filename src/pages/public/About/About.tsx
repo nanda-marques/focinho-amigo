@@ -234,7 +234,6 @@ export default function About(): React.JSX.Element {
         </div>
       </section>
 
-      <PublicFooter />
     </>
   );
 }
