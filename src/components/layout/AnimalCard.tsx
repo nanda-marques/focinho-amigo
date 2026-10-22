@@ -1,33 +1,21 @@
 import { useState } from "react";
+import type { JSX } from "react";
 import { Link } from "react-router-dom";
 
-/** Tipo que representa um animal no sistema. */
-export interface Animal {
-  id?: number;
-  nome: string;
-  tipo?: string;
-  raca?: string;
-  idade?: string;
-  anos?: number;
-  sexo?: string;
-  descricao?: string;
-  porte?: string;
-  imagem: string;
-  tags?: string[];
+import type { Pet } from "../../types/pet";
+
+interface AnimalCardProps {
+  animal: Pet;
+  variant?: "home" | "adocao" | "outro";
+  onConhecer?: (animal: Pet) => void;
 }
 
-/** Props do componente AnimalCard. */
-export interface AnimalCardProps {
-  animal: Animal;
-  variant?: "home" | "adocao";
-  onConhecer?: (animal: Animal) => void;
-}
 
-/**
- * Card de animal reutilizável para listagens.
- * Exibe imagem, informações básicas e botão de ação.
- */
-export default function AnimalCard({ animal, variant = "home", onConhecer }: AnimalCardProps): React.JSX.Element {
+export default function AnimalCard({
+  animal,
+  variant = "home",
+  onConhecer,
+}: AnimalCardProps): JSX.Element {
   const isHome = variant === "home";
   const [favorito, setFavorito] = useState(false);
 
@@ -49,7 +37,9 @@ export default function AnimalCard({ animal, variant = "home", onConhecer }: Ani
           type="button"
           onClick={() => setFavorito(!favorito)}
           aria-label={
-            favorito ? `Remover ${animal.nome} dos favoritos` : `Adicionar ${animal.nome} aos favoritos`
+            favorito
+              ? `Remover ${animal.nome} dos favoritos`
+              : `Adicionar ${animal.nome} aos favoritos`
           }
           aria-pressed={favorito}
           className={`absolute right-3 top-3 flex h-10 w-10 items-center justify-center rounded-full bg-white shadow-md transition hover:scale-110 ${
@@ -83,7 +73,9 @@ export default function AnimalCard({ animal, variant = "home", onConhecer }: Ani
             <span
               role="img"
               aria-label={animal.sexo === "F" ? "Fêmea" : "Macho"}
-              className={`text-base font-bold ${animal.sexo === "F" ? "text-red-500" : "text-marca"}`}
+              className={`text-base font-bold ${
+                animal.sexo === "F" ? "text-red-500" : "text-marca"
+              }`}
             >
               {animal.sexo === "F" ? "♀" : "♂"}
             </span>
@@ -97,14 +89,20 @@ export default function AnimalCard({ animal, variant = "home", onConhecer }: Ani
 
           <span className="rounded-md bg-zinc-100 px-2.5 py-1 text-xs font-semibold text-zinc-700">
             {animal.idade ||
-              (animal.anos != null ? `${animal.anos} ${animal.anos === 1 ? "ano" : "anos"}` : "Idade não informada")}
+              (animal.anos != null
+                ? `${animal.anos} ${animal.anos === 1 ? "ano" : "anos"}`
+                : "Idade não informada")}
           </span>
         </div>
 
         {!isHome && (
           <>
-            <p className="mt-3 flex-1 text-xs leading-5 text-zinc-500">{animal.descricao}</p>
-            <div className="mt-2 text-xs text-zinc-500">Porte: {animal.porte || "Não informado"}</div>
+            <p className="mt-3 flex-1 text-xs leading-5 text-zinc-500">
+              {animal.descricao}
+            </p>
+            <div className="mt-2 text-xs text-zinc-500">
+              Porte: {animal.porte || "Não informado"}
+            </div>
           </>
         )}
 
@@ -118,7 +116,7 @@ export default function AnimalCard({ animal, variant = "home", onConhecer }: Ani
           </button>
         ) : (
           <Link
-            to={animal.id != null ? `/adocao?animal=${animal.id}` : "/adocao"}
+            to={`/adocao?animal=${animal.id}`}
             className="mt-4 block rounded-lg bg-marca px-4 py-2.5 text-center text-xs font-bold text-white transition hover:opacity-90"
           >
             Conhecer {animal.nome}
