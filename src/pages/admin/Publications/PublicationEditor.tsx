@@ -409,7 +409,7 @@ export default function PublicationEditor(): JSX.Element {
                   Publicação em Destaque
                 </strong>
                 <small className="mt-0.5 block text-[12px] text-[#667b9b]">
-                  Colocará o post no banner principal
+                  Colocará o post nos primeiros cards da página de publicações e no carrosel
                 </small>
               </span>
               <input
@@ -428,7 +428,7 @@ export default function PublicationEditor(): JSX.Element {
                   Campanha Urgente
                 </strong>
                 <small className="mt-0.5 block text-[12px] text-[#667b9b]">
-                  Destacará com visual amarelo no site
+                  Colocará o post no carrosel, com destaque visual amarelo
                 </small>
               </span>
               <input
