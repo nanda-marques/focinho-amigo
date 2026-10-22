@@ -1,9 +1,4 @@
-import {
-  useCallback,
-  useEffect,
-  useRef,
-  useState,
-} from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import type { ChangeEvent, FormEvent } from "react";
 import { LuUpload, LuPencil, LuTrash2, LuX } from "react-icons/lu";
 
@@ -13,7 +8,6 @@ import type { Animal, NovoAnimal } from "../../../services/animaisApi";
 import AdminHeader from "../../../components/layout/adminHeader";
 
 type TipoMensagem = "erro" | "sucesso" | "";
-
 interface Mensagem {
   tipo: TipoMensagem;
   texto: string;
@@ -45,10 +39,9 @@ export default function Animais() {
     tipo: "",
     texto: "",
   });
-  const [editandoId, setEditandoId] = useState<number | string | null>(null);
+  const [editandoId, setEditandoId] = useState<string | null>(null);
   const [form, setForm] = useState<FormAnimal>(FORM_INICIAL);
 
-// carregar
   const carregarAnimais = useCallback(async () => {
     setCarregando(true);
     setMensagem({ tipo: "", texto: "" });
@@ -70,8 +63,9 @@ export default function Animais() {
     carregarAnimais();
   }, [carregarAnimais]);
 
-  // Handlers 
-  function handleChange(e: ChangeEvent<HTMLInputElement>) {
+  function handleChange(
+    e: ChangeEvent<HTMLInputElement | HTMLSelectElement>
+  ) {
     const { name, value } = e.target;
     setForm((prev) => ({ ...prev, [name]: value }));
   }
@@ -209,12 +203,13 @@ export default function Animais() {
 
   function getCastracaoBadgeClass(status?: string) {
     const val = (status ?? "").toLowerCase();
-    if (val.includes("castrad")) return "bg-emerald-100 text-emerald-700 font-bold";
-    if (val.includes("agendad")) return "bg-amber-100 text-amber-700 font-bold";
+    if (val.includes("castrad"))
+      return "bg-emerald-100 text-emerald-700 font-bold";
+    if (val.includes("agendad"))
+      return "bg-amber-100 text-amber-700 font-bold";
     return "bg-slate-100 text-slate-600 font-bold";
   }
 
-  // Render 
   return (
     <div className="min-h-screen bg-[#f3f4f6] font-['Inter',sans-serif] text-[#1f2937]">
       <AdminHeader titulo="Animais" />
@@ -254,7 +249,6 @@ export default function Animais() {
           </div>
         )}
 
-        {/* Ficha de Cadastro/Edição */}
         <section className="rounded-xl border border-slate-200 bg-white p-7 shadow-sm">
           <div className="mb-6 flex items-center justify-between">
             <h3 className="text-lg font-extrabold text-[#111827]">
@@ -281,12 +275,23 @@ export default function Animais() {
                 onChange={handleChange}
                 placeholder="Ex.: Bela"
               />
-              <Campo
+              <Select
                 label="Espécie"
                 name="especie"
                 value={form.especie ?? ""}
                 onChange={handleChange}
-                placeholder="Ex.: Cão"
+                options={[
+                  { value: "", label: "Selecione…" },
+                  { value: "Cão", label: "Cão" },
+                  { value: "Gato", label: "Gato" },
+                ]}
+              />
+              <Campo
+                label="Raça"
+                name="raca"
+                value={form.raca ?? ""}
+                onChange={handleChange}
+                placeholder="Ex.: Golden Retriever, SRD…"
               />
               <Campo
                 label="Idade"
@@ -295,12 +300,17 @@ export default function Animais() {
                 onChange={handleChange}
                 placeholder="Ex.: 2 anos"
               />
-              <Campo
+              <Select
                 label="Porte"
                 name="porte"
                 value={form.porte ?? ""}
                 onChange={handleChange}
-                placeholder="Ex.: Grande"
+                options={[
+                  { value: "", label: "Selecione…" },
+                  { value: "Pequeno", label: "Pequeno" },
+                  { value: "Médio", label: "Médio" },
+                  { value: "Grande", label: "Grande" },
+                ]}
               />
               <Campo
                 label="Peso"
@@ -309,12 +319,16 @@ export default function Animais() {
                 onChange={handleChange}
                 placeholder="Ex.: 4kg"
               />
-              <Campo
+              <Select
                 label="Castração"
                 name="castracao"
-                value={form.castracao ?? ""}
+                value={form.castracao ?? "Pendente"}
                 onChange={handleChange}
-                placeholder="Agendada"
+                options={[
+                  { value: "Pendente", label: "Pendente" },
+                  { value: "Castrado", label: "Castrado" },
+                  { value: "Agendada", label: "Agendada" },
+                ]}
               />
               <Campo
                 label="Temperamento"
@@ -330,9 +344,7 @@ export default function Animais() {
                 onChange={handleChange}
                 placeholder="Preto"
               />
-            </div>
-
-            <div>
+              <div>
               <label className="mb-1.5 block text-xs font-extrabold text-[#374151]">
                 Foto
               </label>
@@ -356,6 +368,9 @@ export default function Animais() {
                 </span>
               </button>
             </div>
+            </div>
+
+            
 
             <div className="flex items-center gap-3 pt-2">
               <button
@@ -383,7 +398,6 @@ export default function Animais() {
           </form>
         </section>
 
-        {/* Tabela */}
         <section className="overflow-hidden rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
           <h3 className="mb-5 text-lg font-extrabold text-[#111827]">
             Animais cadastrados
@@ -476,7 +490,7 @@ export default function Animais() {
   );
 }
 
-/* ------------------------------ Campo ------------------------------ */
+// Campo
 interface CampoProps {
   label: string;
   name: keyof FormAnimal;
@@ -499,6 +513,37 @@ function Campo({ label, name, value, onChange, placeholder }: CampoProps) {
         placeholder={placeholder}
         className="w-full rounded-lg border border-slate-200 bg-[#f9fafb] px-4 py-2.5 text-sm outline-none transition focus:border-[#1d70b8] focus:bg-white"
       />
+    </div>
+  );
+}
+
+// Select
+interface SelectProps {
+  label: string;
+  name: keyof FormAnimal;
+  value: string;
+  onChange: (e: ChangeEvent<HTMLSelectElement>) => void;
+  options: Array<{ value: string; label: string }>;
+}
+
+function Select({ label, name, value, onChange, options }: SelectProps) {
+  return (
+    <div>
+      <label className="mb-1.5 block text-xs font-extrabold text-[#374151]">
+        {label}
+      </label>
+      <select
+        name={name}
+        value={value}
+        onChange={onChange}
+        className="w-full cursor-pointer rounded-lg border border-slate-200 bg-[#f9fafb] px-4 py-2.5 text-sm outline-none transition focus:border-[#1d70b8] focus:bg-white"
+      >
+        {options.map((o) => (
+          <option key={o.value} value={o.value}>
+            {o.label}
+          </option>
+        ))}
+      </select>
     </div>
   );
 }
