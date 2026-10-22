@@ -1,114 +1,131 @@
-import { useState, useRef } from "react";
-import { LuUser, LuShield, LuUpload, LuEye, LuEyeOff, LuLock } from "react-icons/lu";
+import { useRef, useState } from "react";
+import type { ChangeEvent, FormEvent } from "react";
+import {
+  LuUser,
+  LuShield,
+  LuUpload,
+  LuEye,
+  LuEyeOff,
+  LuLock,
+} from "react-icons/lu";
+
+import AdminHeader from "../../../components/layout/adminHeader";
+
+type TipoMensagem = "erro" | "sucesso" | "";
+
+interface Mensagem {
+  tipo: TipoMensagem;
+  texto: string;
+}
+
+interface Perfil {
+  nome: string;
+  sobrenome: string;
+  cargo: string;
+  foto: string;
+}
+
+interface Seguranca {
+  senhaAtual: string;
+  novaSenha: string;
+  confirmarNovaSenha: string;
+}
 
 export default function Configuracoes() {
-  const fotoInputRef = useRef(null);
+  const fotoInputRef = useRef<HTMLInputElement>(null);
 
-  // Estados do formulário de Perfil
-  const [perfil, setPerfil] = useState({
+  const [perfil, setPerfil] = useState<Perfil>({
     nome: "Mariana",
     sobrenome: "Silva",
     cargo: "Gestora de projetos",
     foto: "",
   });
 
-  // Estados do formulário de Segurança
-  const [seguranca, setSeguranca] = useState({
+  const [seguranca, setSeguranca] = useState<Seguranca>({
     senhaAtual: "",
     novaSenha: "",
     confirmarNovaSenha: "",
   });
 
-  // Estados para alternar visibilidade das senhas
   const [mostrarSenhaAtual, setMostrarSenhaAtual] = useState(false);
   const [mostrarNovaSenha, setMostrarNovaSenha] = useState(false);
   const [mostrarConfirmarSenha, setMostrarConfirmarSenha] = useState(false);
 
-  const [mensagem, setMensagem] = useState({ tipo: "", texto: "" });
+  const [mensagem, setMensagem] = useState<Mensagem>({
+    tipo: "",
+    texto: "",
+  });
 
-  // Obter iniciais do nome e sobrenome (ex: "Mariana Silva" -> "MS")
-  const iniciaisUsuario = `${perfil.nome.charAt(0)}${perfil.sobrenome.charAt(0)}`.toUpperCase();
+  const iniciaisUsuario = `${perfil.nome.charAt(0)}${perfil.sobrenome.charAt(
+    0
+  )}`.toUpperCase();
 
-  function handlePerfilChange(e) {
+  function handlePerfilChange(e: ChangeEvent<HTMLInputElement>) {
     const { name, value } = e.target;
     setPerfil((prev) => ({ ...prev, [name]: value }));
   }
 
-  function handleSegurancaChange(e) {
+  function handleSegurancaChange(e: ChangeEvent<HTMLInputElement>) {
     const { name, value } = e.target;
     setSeguranca((prev) => ({ ...prev, [name]: value }));
   }
 
-  // Upload da Foto de Perfil em Base64
-  function handleFotoChange(e) {
-    const file = e.target.files[0];
-    if (file) {
-      if (file.size > 5 * 1024 * 1024) {
-        setMensagem({ tipo: "erro", texto: "A foto deve ter no máximo 5MB." });
-        return;
-      }
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setPerfil((prev) => ({ ...prev, foto: reader.result }));
-      };
-      reader.readAsDataURL(file);
+  function handleFotoChange(e: ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (file.size > 5 * 1024 * 1024) {
+      setMensagem({ tipo: "erro", texto: "A foto deve ter no máximo 5MB." });
+      return;
     }
+
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      setPerfil((prev) => ({ ...prev, foto: String(reader.result ?? "") }));
+    };
+    reader.readAsDataURL(file);
   }
 
-  // Salvar Perfil
-  function handleSalvarPerfil(e) {
+  function handleSalvarPerfil(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
-    setMensagem({ tipo: "sucesso", texto: "Informações de perfil atualizadas com sucesso!" });
-    setTimeout(() => setMensagem({ tipo: "", texto: "" }), 4000);
+    setMensagem({
+      tipo: "sucesso",
+      texto: "Informações de perfil atualizadas com sucesso!",
+    });
+    window.setTimeout(() => setMensagem({ tipo: "", texto: "" }), 4000);
   }
 
-  // Alterar Senha
-  function handleAlterarSenha(e) {
+  function handleAlterarSenha(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
-    if (!seguranca.senhaAtual || !seguranca.novaSenha || !seguranca.confirmarNovaSenha) {
-      setMensagem({ tipo: "erro", texto: "Preencha todos os campos de senha." });
+    if (
+      !seguranca.senhaAtual ||
+      !seguranca.novaSenha ||
+      !seguranca.confirmarNovaSenha
+    ) {
+      setMensagem({
+        tipo: "erro",
+        texto: "Preencha todos os campos de senha.",
+      });
       return;
     }
     if (seguranca.novaSenha !== seguranca.confirmarNovaSenha) {
-      setMensagem({ tipo: "erro", texto: "A nova senha e a confirmação não coincidem." });
+      setMensagem({
+        tipo: "erro",
+        texto: "A nova senha e a confirmação não coincidem.",
+      });
       return;
     }
 
     setMensagem({ tipo: "sucesso", texto: "Senha alterada com sucesso!" });
     setSeguranca({ senhaAtual: "", novaSenha: "", confirmarNovaSenha: "" });
-    setTimeout(() => setMensagem({ tipo: "", texto: "" }), 4000);
+    window.setTimeout(() => setMensagem({ tipo: "", texto: "" }), 4000);
   }
 
   return (
-    <div className="min-h-screen bg-[#f3f4f6] font-['Inter',sans-serif] text-[#1f2937]">
-      {/* Top Header */}
-      <header className="flex h-16 items-center justify-between border-b border-slate-200 bg-white px-8">
-        <h1 className="text-2xl font-extrabold text-[#111827]">Configurações</h1>
+    <div className="min-h-full flex min-w-0 flex-1 flex-col bg-[#f3f4f6] font-['Inter',sans-serif] text-[#1f2937]">
+      <AdminHeader titulo="Configurações" />
 
-        <div className="flex items-center gap-3">
-          {perfil.foto ? (
-            <img
-              src={perfil.foto}
-              alt={`${perfil.nome} ${perfil.sobrenome}`}
-              className="h-10 w-10 rounded-full object-cover"
-            />
-          ) : (
-            <div className="grid h-10 w-10 place-items-center rounded-full bg-slate-200 font-bold text-slate-600">
-              {iniciaisUsuario}
-            </div>
-          )}
-
-          <div>
-            <p className="text-sm font-bold text-[#111827]">
-              {perfil.nome} {perfil.sobrenome}
-            </p>
-            <p className="text-xs text-slate-500">{perfil.cargo}</p>
-          </div>
-        </div>
-      </header>
-
-      {/* Main Content */}
-      <main className="mx-auto max-w-[1400px] space-y-8 p-8">
+      <main className="mx-auto w-full max-w-[1400px] space-y-8 p-8">
         {mensagem.texto && (
           <div
             className={`rounded-lg p-4 text-sm font-semibold ${
@@ -136,47 +153,27 @@ export default function Configuracoes() {
 
           <form onSubmit={handleSalvarPerfil} className="space-y-5">
             <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
-              <div>
-                <label className="mb-1.5 block text-xs font-extrabold text-[#374151]">
-                  Nome
-                </label>
-                <input
-                  type="text"
-                  name="nome"
-                  value={perfil.nome}
-                  onChange={handlePerfilChange}
-                  placeholder="Ex.: Mariana"
-                  className="w-full rounded-lg border border-slate-200 bg-[#f9fafb] px-4 py-2.5 text-sm outline-none transition focus:border-[#1d70b8] focus:bg-white"
-                />
-              </div>
-
-              <div>
-                <label className="mb-1.5 block text-xs font-extrabold text-[#374151]">
-                  Sobrenome
-                </label>
-                <input
-                  type="text"
-                  name="sobrenome"
-                  value={perfil.sobrenome}
-                  onChange={handlePerfilChange}
-                  placeholder="Ex.: Silva"
-                  className="w-full rounded-lg border border-slate-200 bg-[#f9fafb] px-4 py-2.5 text-sm outline-none transition focus:border-[#1d70b8] focus:bg-white"
-                />
-              </div>
-
-              <div>
-                <label className="mb-1.5 block text-xs font-extrabold text-[#374151]">
-                  Cargo
-                </label>
-                <input
-                  type="text"
-                  name="cargo"
-                  value={perfil.cargo}
-                  onChange={handlePerfilChange}
-                  placeholder="Ex.: Gestora de projetos"
-                  className="w-full rounded-lg border border-slate-200 bg-[#f9fafb] px-4 py-2.5 text-sm outline-none transition focus:border-[#1d70b8] focus:bg-white"
-                />
-              </div>
+              <Campo
+                label="Nome"
+                name="nome"
+                value={perfil.nome}
+                onChange={handlePerfilChange}
+                placeholder="Ex.: Mariana"
+              />
+              <Campo
+                label="Sobrenome"
+                name="sobrenome"
+                value={perfil.sobrenome}
+                onChange={handlePerfilChange}
+                placeholder="Ex.: Silva"
+              />
+              <Campo
+                label="Cargo"
+                name="cargo"
+                value={perfil.cargo}
+                onChange={handlePerfilChange}
+                placeholder="Ex.: Gestora de projetos"
+              />
 
               <div>
                 <label className="mb-1.5 block text-xs font-extrabold text-[#374151]">
@@ -196,7 +193,9 @@ export default function Configuracoes() {
                 >
                   <LuUpload className="h-4 w-4 text-slate-400" />
                   <span className="truncate">
-                    {perfil.foto ? "Foto carregada com sucesso!" : "Upload de arquivo (PNG, JPG, JPEG)"}
+                    {perfil.foto
+                      ? "Foto carregada com sucesso!"
+                      : "Upload de arquivo (PNG, JPG, JPEG)"}
                   </span>
                 </button>
               </div>
@@ -224,74 +223,33 @@ export default function Configuracoes() {
 
           <form onSubmit={handleAlterarSenha} className="space-y-5 mt-6">
             <div className="grid grid-cols-1 gap-5 md:grid-cols-3">
-              <div>
-                <label className="mb-1.5 block text-xs font-extrabold text-[#374151]">
-                  Senha atual
-                </label>
-                <div className="relative">
-                  <input
-                    type={mostrarSenhaAtual ? "text" : "password"}
-                    name="senhaAtual"
-                    value={seguranca.senhaAtual}
-                    onChange={handleSegurancaChange}
-                    placeholder="Digite sua senha atual."
-                    className="w-full rounded-lg border border-slate-200 bg-[#f9fafb] px-4 py-2.5 pr-10 text-sm outline-none transition focus:border-[#1d70b8] focus:bg-white"
-                  />
-                  <button
-                    type="button"
-                    onClick={() => setMostrarSenhaAtual(!mostrarSenhaAtual)}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
-                  >
-                    {mostrarSenhaAtual ? <LuEyeOff size={18} /> : <LuEye size={18} />}
-                  </button>
-                </div>
-              </div>
-
-              <div>
-                <label className="mb-1.5 block text-xs font-extrabold text-[#374151]">
-                  Nova senha
-                </label>
-                <div className="relative">
-                  <input
-                    type={mostrarNovaSenha ? "text" : "password"}
-                    name="novaSenha"
-                    value={seguranca.novaSenha}
-                    onChange={handleSegurancaChange}
-                    placeholder="Digite a nova senha."
-                    className="w-full rounded-lg border border-slate-200 bg-[#f9fafb] px-4 py-2.5 pr-10 text-sm outline-none transition focus:border-[#1d70b8] focus:bg-white"
-                  />
-                  <button
-                    type="button"
-                    onClick={() => setMostrarNovaSenha(!mostrarNovaSenha)}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
-                  >
-                    {mostrarNovaSenha ? <LuEyeOff size={18} /> : <LuEye size={18} />}
-                  </button>
-                </div>
-              </div>
-
-              <div>
-                <label className="mb-1.5 block text-xs font-extrabold text-[#374151]">
-                  Confirmar nova senha
-                </label>
-                <div className="relative">
-                  <input
-                    type={mostrarConfirmarSenha ? "text" : "password"}
-                    name="confirmarNovaSenha"
-                    value={seguranca.confirmarNovaSenha}
-                    onChange={handleSegurancaChange}
-                    placeholder="Confirme a nova senha."
-                    className="w-full rounded-lg border border-slate-200 bg-[#f9fafb] px-4 py-2.5 pr-10 text-sm outline-none transition focus:border-[#1d70b8] focus:bg-white"
-                  />
-                  <button
-                    type="button"
-                    onClick={() => setMostrarConfirmarSenha(!mostrarConfirmarSenha)}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
-                  >
-                    {mostrarConfirmarSenha ? <LuEyeOff size={18} /> : <LuEye size={18} />}
-                  </button>
-                </div>
-              </div>
+              <CampoSenha
+                label="Senha atual"
+                name="senhaAtual"
+                value={seguranca.senhaAtual}
+                onChange={handleSegurancaChange}
+                placeholder="Digite sua senha atual."
+                mostrar={mostrarSenhaAtual}
+                onToggle={() => setMostrarSenhaAtual((v) => !v)}
+              />
+              <CampoSenha
+                label="Nova senha"
+                name="novaSenha"
+                value={seguranca.novaSenha}
+                onChange={handleSegurancaChange}
+                placeholder="Digite a nova senha."
+                mostrar={mostrarNovaSenha}
+                onToggle={() => setMostrarNovaSenha((v) => !v)}
+              />
+              <CampoSenha
+                label="Confirmar nova senha"
+                name="confirmarNovaSenha"
+                value={seguranca.confirmarNovaSenha}
+                onChange={handleSegurancaChange}
+                placeholder="Confirme a nova senha."
+                mostrar={mostrarConfirmarSenha}
+                onToggle={() => setMostrarConfirmarSenha((v) => !v)}
+              />
             </div>
 
             <div className="pt-2">
@@ -306,6 +264,80 @@ export default function Configuracoes() {
           </form>
         </section>
       </main>
+    </div>
+  );
+}
+
+/* ------------------------------ Campo texto ------------------------------ */
+interface CampoProps {
+  label: string;
+  name: keyof Perfil;
+  value: string;
+  onChange: (e: ChangeEvent<HTMLInputElement>) => void;
+  placeholder?: string;
+}
+
+function Campo({ label, name, value, onChange, placeholder }: CampoProps) {
+  return (
+    <div>
+      <label className="mb-1.5 block text-xs font-extrabold text-[#374151]">
+        {label}
+      </label>
+      <input
+        type="text"
+        name={name}
+        value={value}
+        onChange={onChange}
+        placeholder={placeholder}
+        className="w-full rounded-lg border border-slate-200 bg-[#f9fafb] px-4 py-2.5 text-sm outline-none transition focus:border-[#1d70b8] focus:bg-white"
+      />
+    </div>
+  );
+}
+
+/* ------------------------------ Campo senha ------------------------------ */
+interface CampoSenhaProps {
+  label: string;
+  name: keyof Seguranca;
+  value: string;
+  onChange: (e: ChangeEvent<HTMLInputElement>) => void;
+  placeholder?: string;
+  mostrar: boolean;
+  onToggle: () => void;
+}
+
+function CampoSenha({
+  label,
+  name,
+  value,
+  onChange,
+  placeholder,
+  mostrar,
+  onToggle,
+}: CampoSenhaProps) {
+  return (
+    <div>
+      <label className="mb-1.5 block text-xs font-extrabold text-[#374151]">
+        {label}
+      </label>
+      <div className="relative">
+        <input
+          type={mostrar ? "text" : "password"}
+          name={name}
+          value={value}
+          onChange={onChange}
+          placeholder={placeholder}
+          className="w-full rounded-lg border border-slate-200 bg-[#f9fafb] px-4 py-2.5 pr-10 text-sm outline-none transition focus:border-[#1d70b8] focus:bg-white"
+        />
+        <button
+          type="button"
+          onClick={onToggle}
+          aria-label={mostrar ? "Ocultar senha" : "Mostrar senha"}
+          className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
+        >
+          {mostrar ? <LuEyeOff size={18} /> : <LuEye size={18} />}
+        </button>
+      </div>
     </div>
   );
 }

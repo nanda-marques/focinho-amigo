@@ -1,103 +1,126 @@
-import { useEffect, useState, useRef } from "react";
+import {
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+} from "react";
+import type { ChangeEvent, FormEvent } from "react";
 import { LuUpload, LuPencil, LuTrash2, LuX } from "react-icons/lu";
+
 import { animaisApi } from "../../../services/animaisApi";
+import type { Animal, NovoAnimal } from "../../../services/animaisApi";
+
+import AdminHeader from "../../../components/layout/adminHeader";
+
+type TipoMensagem = "erro" | "sucesso" | "";
+
+interface Mensagem {
+  tipo: TipoMensagem;
+  texto: string;
+}
+
+type FormAnimal = NovoAnimal;
+
+const FORM_INICIAL: FormAnimal = {
+  nome: "",
+  especie: "",
+  raca: "",
+  idade: "",
+  porte: "",
+  peso: "",
+  castracao: "Pendente",
+  temperamento: "",
+  cor: "",
+  foto: "",
+};
 
 export default function Animais() {
-  const fileInputRef = useRef(null);
-  const csvInputRef = useRef(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const csvInputRef = useRef<HTMLInputElement>(null);
 
-  const [animais, setAnimais] = useState([]);
+  const [animais, setAnimais] = useState<Animal[]>([]);
   const [carregando, setCarregando] = useState(true);
   const [salvando, setSalvando] = useState(false);
-  const [mensagem, setMensagem] = useState({ tipo: "", texto: "" });
-  const [editandoId, setEditandoId] = useState(null);
+  const [mensagem, setMensagem] = useState<Mensagem>({
+    tipo: "",
+    texto: "",
+  });
+  const [editandoId, setEditandoId] = useState<number | string | null>(null);
+  const [form, setForm] = useState<FormAnimal>(FORM_INICIAL);
 
-  const formInicial = {
-    nome: "",
-    especie: "",
-    raca: "",
-    idade: "",
-    porte: "",
-    peso: "",
-    castracao: "Pendente",
-    temperamento: "",
-    cor: "",
-    foto: "",
-  };
-
-  const [form, setForm] = useState(formInicial);
-
-  // Carregar lista de animais
-  async function carregarAnimais() {
+// carregar
+  const carregarAnimais = useCallback(async () => {
     setCarregando(true);
     setMensagem({ tipo: "", texto: "" });
     try {
       const dados = await animaisApi.listar();
       setAnimais(Array.isArray(dados) ? dados : []);
-    } catch (e) {
+    } catch {
       setMensagem({
         tipo: "erro",
-        texto: "Não foi possível carregar a lista de animais. Verifique se o backend está em execução.",
+        texto:
+          "Não foi possível carregar a lista de animais. Verifique se o backend está em execução.",
       });
     } finally {
       setCarregando(false);
     }
-  }
+  }, []);
 
   useEffect(() => {
     carregarAnimais();
-  }, []);
+  }, [carregarAnimais]);
 
-  function handleChange(e) {
+  // Handlers 
+  function handleChange(e: ChangeEvent<HTMLInputElement>) {
     const { name, value } = e.target;
     setForm((prev) => ({ ...prev, [name]: value }));
   }
 
-  // Upload da Foto
-  function handleFotoChange(e) {
-    const file = e.target.files[0];
-    if (file) {
-      if (file.size > 5 * 1024 * 1024) {
-        setMensagem({ tipo: "erro", texto: "A foto deve ter no máximo 5MB." });
-        return;
-      }
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setForm((prev) => ({ ...prev, foto: reader.result }));
-      };
-      reader.readAsDataURL(file);
+  function handleFotoChange(e: ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (file.size > 5 * 1024 * 1024) {
+      setMensagem({ tipo: "erro", texto: "A foto deve ter no máximo 5MB." });
+      return;
     }
+
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      setForm((prev) => ({ ...prev, foto: String(reader.result ?? "") }));
+    };
+    reader.readAsDataURL(file);
   }
 
-  // Iniciar modo de edição
-  function IniciarEdicao(animal) {
+  function iniciarEdicao(animal: Animal) {
     setEditandoId(animal.id);
     setForm({
-      nome: animal.nome || "",
-      especie: animal.especie || "",
-      raca: animal.raca || "",
-      idade: animal.idade || "",
-      porte: animal.porte || "",
-      peso: animal.peso || "",
-      castracao: animal.statusCastracao || animal.castracao || "Pendente",
-      temperamento: animal.temperamento || "",
-      cor: animal.cor || "",
-      foto: animal.foto || "",
+      nome: animal.nome ?? "",
+      especie: animal.especie ?? "",
+      raca: animal.raca ?? "",
+      idade: animal.idade ?? "",
+      porte: animal.porte ?? "",
+      peso: animal.peso ?? "",
+      castracao: animal.statusCastracao ?? animal.castracao ?? "Pendente",
+      temperamento: animal.temperamento ?? "",
+      cor: animal.cor ?? "",
+      foto: animal.foto ?? "",
     });
     window.scrollTo({ top: 0, behavior: "smooth" });
   }
 
-  // Cancelar edição
   function cancelarEdicao() {
     setEditandoId(null);
-    setForm(formInicial);
+    setForm(FORM_INICIAL);
   }
 
-  // Submeter formulário (Criar ou Editar)
-  async function handleSubmit(e) {
+  async function handleSubmit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
     if (!form.nome.trim()) {
-      setMensagem({ tipo: "erro", texto: "Por favor, preencha o nome do animal." });
+      setMensagem({
+        tipo: "erro",
+        texto: "Por favor, preencha o nome do animal.",
+      });
       return;
     }
 
@@ -105,51 +128,64 @@ export default function Animais() {
     setMensagem({ tipo: "", texto: "" });
 
     try {
-      if (editandoId) {
+      if (editandoId !== null) {
         await animaisApi.atualizar(editandoId, form);
-        setMensagem({ tipo: "sucesso", texto: "Animal atualizado com sucesso!" });
+        setMensagem({
+          tipo: "sucesso",
+          texto: "Animal atualizado com sucesso!",
+        });
       } else {
         await animaisApi.criar(form);
-        setMensagem({ tipo: "sucesso", texto: "Animal cadastrado com sucesso!" });
+        setMensagem({
+          tipo: "sucesso",
+          texto: "Animal cadastrado com sucesso!",
+        });
       }
 
       cancelarEdicao();
       await carregarAnimais();
-    } catch (err) {
+    } catch (err: unknown) {
       setMensagem({
         tipo: "erro",
-        texto: err.message || "Erro ao salvar os dados do animal.",
+        texto:
+          err instanceof Error
+            ? err.message
+            : "Erro ao salvar os dados do animal.",
       });
     } finally {
       setSalvando(false);
     }
   }
 
-  // Excluir Animal
-  async function handleExcluir(animal) {
-    const confirmou = window.confirm(`Deseja realmente excluir "${animal.nome}"?`);
+  async function handleExcluir(animal: Animal) {
+    const confirmou = window.confirm(
+      `Deseja realmente excluir "${animal.nome}"?`
+    );
     if (!confirmou) return;
 
     try {
       await animaisApi.excluir(animal.id);
-      setMensagem({ tipo: "sucesso", texto: `"${animal.nome}" foi removido com sucesso.` });
-      
-      if (editandoId === animal.id) {
-        cancelarEdicao();
-      }
+      setMensagem({
+        tipo: "sucesso",
+        texto: `"${animal.nome}" foi removido com sucesso.`,
+      });
+
+      if (editandoId === animal.id) cancelarEdicao();
 
       await carregarAnimais();
-    } catch (err) {
+    } catch (err: unknown) {
       setMensagem({
         tipo: "erro",
-        texto: err.message || "Não foi possível excluir o animal.",
+        texto:
+          err instanceof Error
+            ? err.message
+            : "Não foi possível excluir o animal.",
       });
     }
   }
 
-  // Importar CSV
-  async function handleImportarCSV(e) {
-    const file = e.target.files[0];
+  async function handleImportarCSV(e: ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
     if (!file) return;
 
     try {
@@ -157,48 +193,36 @@ export default function Animais() {
       await animaisApi.importarCSV(file);
       setMensagem({ tipo: "sucesso", texto: "CSV importado com sucesso!" });
       await carregarAnimais();
-    } catch (err) {
+    } catch (err: unknown) {
       setMensagem({
         tipo: "erro",
-        texto: err.message || "Erro ao importar o arquivo CSV.",
+        texto:
+          err instanceof Error
+            ? err.message
+            : "Erro ao importar o arquivo CSV.",
       });
     } finally {
       setCarregando(false);
+      if (csvInputRef.current) csvInputRef.current.value = "";
     }
   }
 
-  function getCastracaoBadgeClass(status) {
-    const val = (status || "").toLowerCase();
-    if (val.includes("castrad")) {
-      return "bg-emerald-100 text-emerald-700 font-bold";
-    }
-    if (val.includes("agendad")) {
-      return "bg-amber-100 text-amber-700 font-bold";
-    }
+  function getCastracaoBadgeClass(status?: string) {
+    const val = (status ?? "").toLowerCase();
+    if (val.includes("castrad")) return "bg-emerald-100 text-emerald-700 font-bold";
+    if (val.includes("agendad")) return "bg-amber-100 text-amber-700 font-bold";
     return "bg-slate-100 text-slate-600 font-bold";
   }
 
+  // Render 
   return (
     <div className="min-h-screen bg-[#f3f4f6] font-['Inter',sans-serif] text-[#1f2937]">
-      {/* Header */}
-      <header className="flex h-16 items-center justify-between border-b border-slate-200 bg-white px-8">
-        <h1 className="text-2xl font-extrabold text-[#111827]">Animais</h1>
-
-        <div className="flex items-center gap-3">
-          <div className="grid h-10 w-10 place-items-center rounded-full bg-slate-200 font-bold text-slate-600">
-            MS
-          </div>
-          <div>
-            <p className="text-sm font-bold text-[#111827]">Mariana Silva</p>
-            <p className="text-xs text-slate-500">Gestora de Projetos</p>
-          </div>
-        </div>
-      </header>
+      <AdminHeader titulo="Animais" />
 
       <main className="mx-auto max-w-[1400px] space-y-8 p-8">
         <div className="flex items-center justify-between">
           <h2 className="text-2xl font-extrabold text-[#111827]">
-            {editandoId ? "Editar Animal" : "Cadastro de Animais"}
+            {editandoId !== null ? "Editar Animal" : "Cadastro de Animais"}
           </h2>
 
           <input
@@ -234,10 +258,10 @@ export default function Animais() {
         <section className="rounded-xl border border-slate-200 bg-white p-7 shadow-sm">
           <div className="mb-6 flex items-center justify-between">
             <h3 className="text-lg font-extrabold text-[#111827]">
-              {editandoId ? "Editar Ficha do Animal" : "Ficha"}
+              {editandoId !== null ? "Editar Ficha do Animal" : "Ficha"}
             </h3>
 
-            {editandoId && (
+            {editandoId !== null && (
               <button
                 type="button"
                 onClick={cancelarEdicao}
@@ -250,117 +274,62 @@ export default function Animais() {
 
           <form onSubmit={handleSubmit} className="space-y-5">
             <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
-              <div>
-                <label className="mb-1.5 block text-xs font-extrabold text-[#374151]">
-                  Nome do animal
-                </label>
-                <input
-                  type="text"
-                  name="nome"
-                  value={form.nome}
-                  onChange={handleChange}
-                  placeholder="Ex.: Bela"
-                  className="w-full rounded-lg border border-slate-200 bg-[#f9fafb] px-4 py-2.5 text-sm outline-none transition focus:border-[#1d70b8] focus:bg-white"
-                />
-              </div>
-
-              <div>
-                <label className="mb-1.5 block text-xs font-extrabold text-[#374151]">
-                  Espécie
-                </label>
-                <input
-                  type="text"
-                  name="especie"
-                  value={form.especie}
-                  onChange={handleChange}
-                  placeholder="Ex.: Cão"
-                  className="w-full rounded-lg border border-slate-200 bg-[#f9fafb] px-4 py-2.5 text-sm outline-none transition focus:border-[#1d70b8] focus:bg-white"
-                />
-              </div>
-
-              <div>
-                <label className="mb-1.5 block text-xs font-extrabold text-[#374151]">
-                  Idade
-                </label>
-                <input
-                  type="text"
-                  name="idade"
-                  value={form.idade}
-                  onChange={handleChange}
-                  placeholder="Ex.: 2 anos"
-                  className="w-full rounded-lg border border-slate-200 bg-[#f9fafb] px-4 py-2.5 text-sm outline-none transition focus:border-[#1d70b8] focus:bg-white"
-                />
-              </div>
-
-              <div>
-                <label className="mb-1.5 block text-xs font-extrabold text-[#374151]">
-                  Porte
-                </label>
-                <input
-                  type="text"
-                  name="porte"
-                  value={form.porte}
-                  onChange={handleChange}
-                  placeholder="Ex.: Grande"
-                  className="w-full rounded-lg border border-slate-200 bg-[#f9fafb] px-4 py-2.5 text-sm outline-none transition focus:border-[#1d70b8] focus:bg-white"
-                />
-              </div>
-
-              <div>
-                <label className="mb-1.5 block text-xs font-extrabold text-[#374151]">
-                  Peso
-                </label>
-                <input
-                  type="text"
-                  name="peso"
-                  value={form.peso}
-                  onChange={handleChange}
-                  placeholder="Ex.: 4kg"
-                  className="w-full rounded-lg border border-slate-200 bg-[#f9fafb] px-4 py-2.5 text-sm outline-none transition focus:border-[#1d70b8] focus:bg-white"
-                />
-              </div>
-
-              <div>
-                <label className="mb-1.5 block text-xs font-extrabold text-[#374151]">
-                  Castração
-                </label>
-                <input
-                  type="text"
-                  name="castracao"
-                  value={form.castracao}
-                  onChange={handleChange}
-                  placeholder="Agendada"
-                  className="w-full rounded-lg border border-slate-200 bg-[#f9fafb] px-4 py-2.5 text-sm outline-none transition focus:border-[#1d70b8] focus:bg-white"
-                />
-              </div>
-
-              <div>
-                <label className="mb-1.5 block text-xs font-extrabold text-[#374151]">
-                  Temperamento
-                </label>
-                <input
-                  type="text"
-                  name="temperamento"
-                  value={form.temperamento}
-                  onChange={handleChange}
-                  placeholder="Ex.: Dócil"
-                  className="w-full rounded-lg border border-slate-200 bg-[#f9fafb] px-4 py-2.5 text-sm outline-none transition focus:border-[#1d70b8] focus:bg-white"
-                />
-              </div>
-
-              <div>
-                <label className="mb-1.5 block text-xs font-extrabold text-[#374151]">
-                  Cor
-                </label>
-                <input
-                  type="text"
-                  name="cor"
-                  value={form.cor}
-                  onChange={handleChange}
-                  placeholder="Preto"
-                  className="w-full rounded-lg border border-slate-200 bg-[#f9fafb] px-4 py-2.5 text-sm outline-none transition focus:border-[#1d70b8] focus:bg-white"
-                />
-              </div>
+              <Campo
+                label="Nome do animal"
+                name="nome"
+                value={form.nome}
+                onChange={handleChange}
+                placeholder="Ex.: Bela"
+              />
+              <Campo
+                label="Espécie"
+                name="especie"
+                value={form.especie ?? ""}
+                onChange={handleChange}
+                placeholder="Ex.: Cão"
+              />
+              <Campo
+                label="Idade"
+                name="idade"
+                value={form.idade ?? ""}
+                onChange={handleChange}
+                placeholder="Ex.: 2 anos"
+              />
+              <Campo
+                label="Porte"
+                name="porte"
+                value={form.porte ?? ""}
+                onChange={handleChange}
+                placeholder="Ex.: Grande"
+              />
+              <Campo
+                label="Peso"
+                name="peso"
+                value={form.peso ?? ""}
+                onChange={handleChange}
+                placeholder="Ex.: 4kg"
+              />
+              <Campo
+                label="Castração"
+                name="castracao"
+                value={form.castracao ?? ""}
+                onChange={handleChange}
+                placeholder="Agendada"
+              />
+              <Campo
+                label="Temperamento"
+                name="temperamento"
+                value={form.temperamento ?? ""}
+                onChange={handleChange}
+                placeholder="Ex.: Dócil"
+              />
+              <Campo
+                label="Cor"
+                name="cor"
+                value={form.cor ?? ""}
+                onChange={handleChange}
+                placeholder="Preto"
+              />
             </div>
 
             <div>
@@ -396,12 +365,12 @@ export default function Animais() {
               >
                 {salvando
                   ? "Salvando..."
-                  : editandoId
+                  : editandoId !== null
                   ? "Salvar Alterações"
                   : "Cadastrar"}
               </button>
 
-              {editandoId && (
+              {editandoId !== null && (
                 <button
                   type="button"
                   onClick={cancelarEdicao}
@@ -414,7 +383,7 @@ export default function Animais() {
           </form>
         </section>
 
-        {/* Tabela com Ações ao lado de cada animal */}
+        {/* Tabela */}
         <section className="overflow-hidden rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
           <h3 className="mb-5 text-lg font-extrabold text-[#111827]">
             Animais cadastrados
@@ -436,13 +405,13 @@ export default function Animais() {
               <tbody className="divide-y divide-slate-100">
                 {carregando ? (
                   <tr>
-                    <td colSpan="6" className="p-8 text-center text-slate-500">
+                    <td colSpan={6} className="p-8 text-center text-slate-500">
                       Carregando animais...
                     </td>
                   </tr>
                 ) : animais.length === 0 ? (
                   <tr>
-                    <td colSpan="6" className="p-8 text-center text-slate-500">
+                    <td colSpan={6} className="p-8 text-center text-slate-500">
                       Nenhum animal cadastrado.
                     </td>
                   </tr>
@@ -467,7 +436,9 @@ export default function Animais() {
                             animal.statusCastracao || animal.castracao
                           )}`}
                         >
-                          {animal.statusCastracao || animal.castracao || "Pendente"}
+                          {animal.statusCastracao ||
+                            animal.castracao ||
+                            "Pendente"}
                         </span>
                       </td>
                       <td className="px-5 py-4 text-slate-500">
@@ -478,7 +449,7 @@ export default function Animais() {
                           <button
                             type="button"
                             title="Editar"
-                            onClick={() => IniciarEdicao(animal)}
+                            onClick={() => iniciarEdicao(animal)}
                             className="rounded-md p-1.5 text-slate-500 transition hover:bg-slate-100 hover:text-[#1d70b8]"
                           >
                             <LuPencil size={17} />
@@ -503,4 +474,31 @@ export default function Animais() {
       </main>
     </div>
   );
-}// Convertido de JSX para TSX - verifique tipos conforme necessidade
+}
+
+/* ------------------------------ Campo ------------------------------ */
+interface CampoProps {
+  label: string;
+  name: keyof FormAnimal;
+  value: string;
+  onChange: (e: ChangeEvent<HTMLInputElement>) => void;
+  placeholder?: string;
+}
+
+function Campo({ label, name, value, onChange, placeholder }: CampoProps) {
+  return (
+    <div>
+      <label className="mb-1.5 block text-xs font-extrabold text-[#374151]">
+        {label}
+      </label>
+      <input
+        type="text"
+        name={name}
+        value={value}
+        onChange={onChange}
+        placeholder={placeholder}
+        className="w-full rounded-lg border border-slate-200 bg-[#f9fafb] px-4 py-2.5 text-sm outline-none transition focus:border-[#1d70b8] focus:bg-white"
+      />
+    </div>
+  );
+}
