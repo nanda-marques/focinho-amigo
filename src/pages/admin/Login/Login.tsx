@@ -1,7 +1,8 @@
 import { useState } from "react";
 import { FiMail, FiLock, FiEye, FiEyeOff, FiHeart } from "react-icons/fi";
 import { FaPaw } from "react-icons/fa";
-import logo from "../../../assets/image 3.svg";
+
+import logo from "../../../assets/logo_pequena.svg";
 
 /** Página de login administrativo. */
 export default function Login(): React.JSX.Element {
