@@ -1,20 +1,43 @@
 // Dados de teste (somente front-end). Quando houver back-end, esta lista
 // passa a vir da API no mesmo formato.
 
-const IMAGEM_TESTE = "src/assets/images/pets/amora.png";
+import type { ItemHistorico, Pet } from "../types/pet";
 
-// Repete a mesma foto para testar a galeria do pop-up.
-const fotosTeste = (imagem) => [imagem, imagem, imagem, imagem];
+export type { DetalhesPet, ItemHistorico, Pet, TipoHistorico } from "../types/pet";
 
-// Monta o "Histórico Médico" exibido no pop-up.
-const historico = ({ vacina, vermifugo, castracao, microchip }) => [
-  { tipo: "vacinacao", titulo: "Vacinação", texto: vacina },
-  { tipo: "vermifugacao", titulo: "Vermifugação/Ectoparasitas", texto: vermifugo },
-  { tipo: "castracao", titulo: "Castração", texto: castracao },
-  { tipo: "microchip", titulo: "Microchip", texto: microchip },
-];
+const IMAGEM_TESTE = "/images/pets/amora.png";
 
-export const pets = [
+const fotosTeste = (imagem: string): string[] => Array(4).fill(imagem);
+
+const historico = ({
+  vacina,
+  vermifugo,
+  castracao,
+  microchip,
+}: {
+  vacina?: string;
+  vermifugo?: string;
+  castracao?: string;
+  microchip?: string;
+}): ItemHistorico[] => {
+  const itens: ItemHistorico[] = [];
+  if (vacina)
+    itens.push({ tipo: "vacinacao", titulo: "Vacinação", texto: vacina });
+  if (vermifugo)
+    itens.push({
+      tipo: "vermifugacao",
+      titulo: "Vermifugação/Ectoparasitas",
+      texto: vermifugo,
+    });
+  if (castracao)
+    itens.push({ tipo: "castracao", titulo: "Castração", texto: castracao });
+  if (microchip)
+    itens.push({ tipo: "microchip", titulo: "Microchip", texto: microchip });
+  return itens;
+};
+
+
+export const pets: Pet[] = [
   {
     id: 1,
     nome: "Simba",
@@ -80,7 +103,6 @@ export const pets = [
       }),
     },
   },
-
   {
     id: 7,
     nome: "Thor",
