@@ -1,4 +1,4 @@
-import { BrowserRouter, Routes, Route, Outlet } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Outlet, Navigate } from "react-router-dom";
 import type { JSX } from "react";
 
 import PublicMenu from "./components/layout/PublicMenu";
@@ -36,6 +36,14 @@ function PublicLayout(): JSX.Element {
   );
 }
 
+function ProtectedRoute(): JSX.Element {
+  const token = localStorage.getItem("token");
+  if (!token) {
+    return <Navigate to="/admin/login" replace />;
+  }
+  return <Outlet />;
+}
+
 function AdminLayout(): JSX.Element {
   return (
     <div className="admin-area flex min-h-screen bg-[#f0f0f0]">
@@ -66,14 +74,16 @@ function App(): JSX.Element {
         <Route path="/admin/login" element={<Login />} />
         <Route path="/admin/cadastro" element={<Register />} />
 
-        <Route element={<AdminLayout />}>
-          <Route path="/admin/dashboard" element={<Dashboard />} />
-          <Route path="/admin/animais" element={<Animals />} />
-          <Route path="/admin/publicacoes" element={<Publications />} />
-          <Route path="/admin/publicacoes/nova" element={<PublicationEditor />} />
-          <Route path="/admin/publicacoes/:id/editar" element={<PublicationEditor />} />
-          <Route path="/admin/publicacoes/:id/preview" element={<PublicationPreview />} />
-          <Route path="/admin/configuracoes" element={<Settings />} />
+        <Route element={<ProtectedRoute />}>
+          <Route element={<AdminLayout />}>
+            <Route path="/admin/dashboard" element={<Dashboard />} />
+            <Route path="/admin/animais" element={<Animals />} />
+            <Route path="/admin/publicacoes" element={<Publications />} />
+            <Route path="/admin/publicacoes/nova" element={<PublicationEditor />} />
+            <Route path="/admin/publicacoes/:id/editar" element={<PublicationEditor />} />
+            <Route path="/admin/publicacoes/:id/preview" element={<PublicationPreview />} />
+            <Route path="/admin/configuracoes" element={<Settings />} />
+          </Route>
         </Route>
       </Routes>
     </BrowserRouter>

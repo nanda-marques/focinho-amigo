@@ -18,6 +18,9 @@ import {
   FiCheck,
 } from "react-icons/fi";
 
+import { useNavigate } from "react-router-dom";
+import { authApi } from "../../../services/authApi";
+
 import logo from "../../../assets/logo_pequena.svg";
 
 const CARGOS = [
@@ -164,32 +167,43 @@ export default function Cadastro(): JSX.Element {
   }
 
   async function enviar(e: FormEvent) {
-    e.preventDefault();
-    const x: Erros = {};
+  e.preventDefault();
+  const x: Erros = {};
 
-    (["nome", "sobrenome", "email", "senha", "confirmar"] as const).forEach(
-      (c) => {
-        if (!f[c].trim()) x[c] = "Campo obrigatório";
-      }
+  (["nome", "sobrenome", "email", "senha", "confirmar"] as const).forEach(
+    (c) => {
+      if (!f[c].trim()) x[c] = "Campo obrigatório";
+    }
+  );
+  if (f.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(f.email)) {
+    x.email = "E-mail inválido";
+  }
+  if (f.senha && nivel < 2) x.senha = "Senha muito fraca";
+  if (f.confirmar && f.senha !== f.confirmar) {
+    x.confirmar = "As senhas não coincidem";
+  }
+  if (erros.foto) x.foto = erros.foto;
+
+  setErros(x);
+  if (Object.keys(x).length) return;
+
+  try {
+    await authApi.cadastrar({
+      nome: f.nome,
+      sobrenome: f.sobrenome,
+      email: f.email,
+      cargo: f.cargo,
+      senha: f.senha,
+    });
+    setSucesso(true);
+  } catch (err: unknown) {
+    const msg =
+      err instanceof Error ? err.message : "Erro ao criar conta";
+    setErros(
+      msg.toLowerCase().includes("e-mail")
+        ? { email: msg }
+        : { geral: msg }
     );
-    if (f.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(f.email)) {
-      x.email = "E-mail inválido";
-    }
-    if (f.senha && nivel < 2) x.senha = "Senha muito fraca";
-    if (f.confirmar && f.senha !== f.confirmar) {
-      x.confirmar = "As senhas não coincidem";
-    }
-    if (erros.foto) x.foto = erros.foto;
-
-    setErros(x);
-    if (Object.keys(x).length) return;
-
-    try {
-      // TODO: chamar API de cadastro aqui
-      setSucesso(true);
-    } catch (err: unknown) {
-      setErros({ geral: "Erro ao criar conta" });
-      console.error(err);
     }
   }
 

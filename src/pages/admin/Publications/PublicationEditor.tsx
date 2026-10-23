@@ -15,6 +15,8 @@ import {
 } from "react-icons/lu";
 
 import { publicacoesApi } from "../../../services/publicacoesApi";
+import AdminHeader from "../../../components/layout/adminHeader";
+
 import type {
   Publicacao,
   StatusPublicacao,
@@ -160,40 +162,41 @@ export default function PublicationEditor(): JSX.Element {
   }
 
   return (
-    <div className="box-border flex min-h-screen min-w-0 flex-1 flex-col bg-[#f0f0f0] font-['Inter',Arial,sans-serif] text-[#202b3e] *:box-border">
-      <header className="flex flex-wrap items-center justify-between gap-x-4 gap-y-3 border-b border-[#e2e2e2] bg-white py-4 pl-[72px] pr-5 sm:pr-8 lg:px-8 lg:py-5">
-        <h1 className="m-0 text-[22px] font-extrabold leading-[1.2] tracking-[-0.5px] sm:text-[26px]">
-          {id ? "Editar Publicação" : "Nova Publicação"}
-        </h1>
-        <div className="flex flex-wrap gap-2.5">
-          <button
-            type="button"
-            disabled={salvando}
-            onClick={() => salvar("rascunho")}
-            className={`${botaoCabecalho} border border-[#dce5ef] bg-white text-[#667b9b] hover:bg-[#f7f9fb]`}
-          >
-            <LuSave size={15} />
-            Salvar Rascunho
-          </button>
-          <button
-            type="button"
-            disabled={salvando}
-            onClick={() => salvar(form.status ?? "rascunho", true)}
-            className={`${botaoCabecalho} border border-[#2174b7] bg-white text-[#2174b7] hover:bg-[#e8f3fd]`}
-          >
-            <LuEye size={15} />
-            Pré-visualizar
-          </button>
-          <button
-            type="button"
-            disabled={salvando}
-            onClick={() => salvar("publicado")}
-            className={`${botaoCabecalho} border-0 bg-[#ffb800] text-white hover:bg-[#e6a600]`}
-          >
-            {salvando ? "Salvando..." : "Publicar"}
-          </button>
-        </div>
-      </header>
+        <div className="box-border flex min-h-screen min-w-0 flex-1 flex-col bg-[#f0f0f0] font-['Inter',Arial,sans-serif] text-[#202b3e] *:box-border">
+      <AdminHeader
+        titulo={id ? "Editar Publicação" : "Nova Publicação"}
+        acoes={
+          <div className="flex flex-wrap gap-2.5">
+            <button
+              type="button"
+              disabled={salvando}
+              onClick={() => salvar("rascunho")}
+              className={`${botaoCabecalho} border border-[#dce5ef] bg-white text-[#667b9b] hover:bg-[#f7f9fb]`}
+            >
+              <LuSave size={15} />
+              Salvar Rascunho
+            </button>
+            <button
+              type="button"
+              disabled={salvando}
+              onClick={() => salvar(form.status ?? "rascunho", true)}
+              className={`${botaoCabecalho} border border-[#2174b7] bg-white text-[#2174b7] hover:bg-[#e8f3fd]`}
+            >
+              <LuEye size={15} />
+              Pré-visualizar
+            </button>
+            <button
+              type="button"
+              disabled={salvando}
+              onClick={() => salvar("publicado")}
+              className={`${botaoCabecalho} border-0 bg-[#ffb800] text-white hover:bg-[#e6a600]`}
+            >
+              {salvando ? "Salvando..." : "Publicar"}
+            </button>
+          </div>
+        }
+      />
+
 
       <main className="flex-1 p-5 sm:p-6 lg:p-8">
         {erro && (
