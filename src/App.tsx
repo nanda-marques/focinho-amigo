@@ -23,6 +23,9 @@ import Publications from "./pages/admin/Publications/Publications";
 import PublicationEditor from "./pages/admin/Publications/PublicationEditor";
 import PublicationPreview from "./pages/admin/Publications/PublicationPreview";
 import Settings from "./pages/admin/Settings/Settings";
+import RecuperarSenha from "./pages/admin/RecuperarSenha/Senha";
+
+
 
 function PublicLayout(): JSX.Element {
   return (
@@ -73,6 +76,7 @@ function App(): JSX.Element {
 
         <Route path="/admin/login" element={<Login />} />
         <Route path="/admin/cadastro" element={<Register />} />
+        <Route path="/admin/recuperar-senha" element={<RecuperarSenha />} />
 
         <Route element={<ProtectedRoute />}>
           <Route element={<AdminLayout />}>
