@@ -1,7 +1,7 @@
 import { useMemo, useState } from "react";
 import type { Dispatch, JSX, SetStateAction } from "react";
 import { useSearchParams } from "react-router-dom";
-
+import PageHero from "../../../components/layout/PageHero";
 import PublicFooter from "../../../components/layout/PublicFooter";
 import AnimalCard from "../../../components/layout/AnimalCard";
 import PetDetailsModal from "../../../components/adoption/PetDetailsModal";
@@ -178,30 +178,19 @@ export default function Adoption(): JSX.Element {
 
   return (
     <>
-      {/* HERO */}
-      <section
-        className="relative flex min-h-[260px] items-center bg-cover bg-center md:min-h-[300px]"
-        style={{ backgroundImage: "url('/images/adocao/hero.jpg')" }}
-      >
-        <div className="absolute inset-0 bg-black/50" />
-        <div className="relative z-10 mx-auto w-full max-w-7xl px-5 lg:px-14">
-          <div className="max-w-xl text-white">
-            <h1 className="text-3xl font-extrabold md:text-4xl">
-              Adote um Amigo
-            </h1>
-            <p className="mt-3 text-sm leading-6 text-white/90 md:text-base">
-              Abra os braços para um carinho sincero e sinta a incomparável
-              emoção de salvar e acolher uma vida.
-            </p>
-            <a
-              href="#formulario"
-              className="mt-5 inline-block rounded-lg bg-marca px-5 py-3 text-center text-sm font-bold text-white transition hover:opacity-90"
-            >
-              Preencher Formulário de Adoção
-            </a>
-          </div>
-        </div>
-      </section>
+     <PageHero
+  titulo="Adote um Amigo"
+  descricao="Abra os braços para um carinho sincero e sinta a incomparável emoção de salvar e acolher uma vida."
+  imagem="src/assets/images/hero/heroAdoption.png"
+>
+  <a
+    href="#formulario"
+    className="mt-5 block rounded-lg bg-marca px-5 py-3 text-center text-sm font-bold text-white transition hover:opacity-90 md:inline-block"
+  >
+    <span className="md:hidden">Formulário de Adoção</span>
+    <span className="hidden md:inline">Preencher Formulário de Adoção</span>
+  </a>
+</PageHero>
 
       {/* NOSSOS PELUDOS */}
       <section className="bg-[#f8f9fb] px-5 py-10 lg:px-14 lg:py-12">

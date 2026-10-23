@@ -2,6 +2,7 @@
 import { Link } from "react-router-dom";
 import PublicFooter from "../../../components/layout/PublicFooter";
 import AnimalCard from "../../../components/layout/AnimalCard";
+import PageHero from "../../../components/layout/PageHero";
 import { pets } from "../../../data/pets.js";
 
 // Benefícios do apadrinhamento
@@ -47,37 +48,18 @@ export default function Sponsorship() {
 
   return (
     <>
-      {/* =====================================================
-          HERO
-      ====================================================== */}
-      <section
-        className="relative flex min-h-[300px] items-center bg-cover bg-center md:min-h-[340px]"
-        style={{
-          backgroundImage: "url('/images/apadrinhamento/hero.jpg')",
-        }}
+            <PageHero
+        titulo="Apadrinhe um Focinho"
+        descricao="Transforme positivamente o tratamento e o dia de um animal sem poder trazê-lo para casa."
+        imagem="src/assets/images/hero/heroSponsorship.png"
       >
-        <div className="absolute inset-0 bg-black/45" />
-
-        <div className="relative z-10 mx-auto w-full max-w-7xl px-5 lg:px-14">
-          <div className="max-w-xl text-white md:max-w-2xl">
-            <h1 className="text-3xl font-extrabold md:text-4xl">
-              Apadrinhe um Focinho
-            </h1>
-
-            <p className="mt-3 text-sm leading-6 text-white/90 md:text-base">
-              Transforme positivamente o tratamento e o dia de um animal sem
-              poder trazê-lo para casa.
-            </p>
-
-            <a
-              href="#planos"
-              className="mt-5 hidden rounded-lg bg-marca px-5 py-3 text-sm font-bold text-white transition hover:opacity-90 md:inline-block"
-            >
-              Ver Planos de Apadrinhamento
-            </a>
-          </div>
-        </div>
-      </section>
+        <a
+          href="#planos"
+          className="mt-5 hidden rounded-lg bg-marca px-5 py-3 text-sm font-bold text-white transition hover:opacity-90 md:inline-block"
+        >
+          Ver Planos de Apadrinhamento
+        </a>
+      </PageHero>
 
       {/* =====================================================
           O QUE É O APADRINHAMENTO

@@ -1,4 +1,4 @@
-import { BrowserRouter, Routes, Route, Outlet } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Outlet, Navigate } from "react-router-dom";
 import type { JSX } from "react";
 
 import PublicMenu from "./components/layout/PublicMenu";
@@ -13,6 +13,7 @@ import Volunteer from "./pages/public/Volunteer/Volunteer";
 import Help from "./pages/public/Help/Help";
 import Contact from "./pages/public/Contact/Contact";
 import CampaignsNews from "./pages/public/CampaignsNews/CampaignsNews";
+import CampaignDetail from "./pages/public/CampaignDetail/CampaignDetail";
 
 import Login from "./pages/admin/Login/Login";
 import Register from "./pages/admin/Register/Register";
@@ -33,6 +34,14 @@ function PublicLayout(): JSX.Element {
       <PublicFooter />
     </>
   );
+}
+
+function ProtectedRoute(): JSX.Element {
+  const token = localStorage.getItem("token");
+  if (!token) {
+    return <Navigate to="/admin/login" replace />;
+  }
+  return <Outlet />;
 }
 
 function AdminLayout(): JSX.Element {
@@ -59,19 +68,22 @@ function App(): JSX.Element {
           <Route path="/como-ajudar" element={<Help />} />
           <Route path="/contato" element={<Contact />} />
           <Route path="/campanhas-e-noticias" element={<CampaignsNews />} />
+          <Route path="/campanhas-e-noticias/:id" element={<CampaignDetail />} />
         </Route>
 
         <Route path="/admin/login" element={<Login />} />
         <Route path="/admin/cadastro" element={<Register />} />
 
-        <Route element={<AdminLayout />}>
-          <Route path="/admin/dashboard" element={<Dashboard />} />
-          <Route path="/admin/animais" element={<Animals />} />
-          <Route path="/admin/publicacoes" element={<Publications />} />
-          <Route path="/admin/publicacoes/nova" element={<PublicationEditor />} />
-          <Route path="/admin/publicacoes/:id/editar" element={<PublicationEditor />} />
-          <Route path="/admin/publicacoes/:id/preview" element={<PublicationPreview />} />
-          <Route path="/admin/configuracoes" element={<Settings />} />
+        <Route element={<ProtectedRoute />}>
+          <Route element={<AdminLayout />}>
+            <Route path="/admin/dashboard" element={<Dashboard />} />
+            <Route path="/admin/animais" element={<Animals />} />
+            <Route path="/admin/publicacoes" element={<Publications />} />
+            <Route path="/admin/publicacoes/nova" element={<PublicationEditor />} />
+            <Route path="/admin/publicacoes/:id/editar" element={<PublicationEditor />} />
+            <Route path="/admin/publicacoes/:id/preview" element={<PublicationPreview />} />
+            <Route path="/admin/configuracoes" element={<Settings />} />
+          </Route>
         </Route>
       </Routes>
     </BrowserRouter>

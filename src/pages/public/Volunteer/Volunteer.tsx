@@ -1,4 +1,5 @@
 import PublicFooter from "../../../components/layout/PublicFooter";
+import PageHero from "../../../components/layout/PageHero";
 import {
   IconCheck,
   IconDoc,
@@ -33,25 +34,11 @@ const requisitos = [
 export default function Volunteer() {
   return (
     <>
-      {/* =====================================================
-          HERO
-      ====================================================== */}
-      <section
-        className="relative flex min-h-[260px] items-center bg-cover bg-center md:min-h-[300px]"
-        style={{ backgroundImage: "url('/images/voluntariado/hero.jpg')" }}
-      >
-        <div className="absolute inset-0 bg-black/45" />
-        <div className="relative z-10 mx-auto w-full max-w-7xl px-5 py-8 lg:px-14">
-          <div className="max-w-xl text-white md:max-w-2xl">
-            <h1 className="text-3xl font-extrabold md:text-4xl">Seja um Voluntário</h1>
-            <p className="mt-3 text-sm leading-6 text-white/90 md:text-base">
-              Mude a realidade de centenas de patinhas. Doe seu tempo, carinho e
-              dedicação para guiar animais abandonados rumo a um novo recomeço
-              cheio de amor.
-            </p>
-          </div>
-        </div>
-      </section>
+      <PageHero
+        titulo="Seja um Voluntário"
+        descricao="Mude a realidade de centenas de patinhas. Doe seu tempo, carinho e dedicação para guiar animais abandonados rumo a um novo recomeço cheio de amor."
+        imagem="src/assets/images/hero/heroVolunteer.png"
+      />
 
       {/* =====================================================
           POR QUE SER VOLUNTÁRIO

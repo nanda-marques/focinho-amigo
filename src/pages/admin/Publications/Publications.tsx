@@ -16,6 +16,8 @@ import {
 } from "react-icons/lu";
 
 import { publicacoesApi } from "../../../services/publicacoesApi";
+import AdminHeader from "../../../components/layout/adminHeader";
+
 import type {
   Publicacao,
   StatusPublicacao,
@@ -203,22 +205,7 @@ export default function Publications(): JSX.Element {
 
   return (
     <div className="box-border flex min-h-screen min-w-0 flex-1 flex-col bg-[#f0f0f0] font-['Inter',Arial,sans-serif] text-[#202b3e] *:box-border">
-      <header className="flex flex-wrap items-center justify-between gap-x-4 gap-y-3 border-b border-[#e2e2e2] bg-white py-4 pl-[72px] pr-5 sm:pr-8 lg:px-8 lg:py-5">
-        <h1 className="m-0 text-[22px] font-extrabold leading-[1.2] tracking-[-0.5px] sm:text-[26px]">
-          Gerenciar Publicações
-        </h1>
-        <div className="flex items-center gap-3">
-          <div className="grid h-[38px] w-[38px] place-items-center overflow-hidden rounded-full bg-[#e8f3fd] text-[13px] font-bold text-[#0874ca]">
-            <span>MS</span>
-          </div>
-          <div className="hidden text-right leading-tight sm:block">
-            <p className="m-0 text-[14px] font-bold">Mariana Silva</p>
-            <p className="m-0 text-[12.5px] text-[#667b9b]">
-              Gestora de Projetos
-            </p>
-          </div>
-        </div>
-      </header>
+      <AdminHeader titulo="Gerenciar Publicações"/>
 
       <main className="flex flex-1 flex-col gap-5 p-5 sm:p-6 lg:p-8">
         <div className="flex flex-wrap items-center justify-between gap-3">
