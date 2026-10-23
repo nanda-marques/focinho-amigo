@@ -1,6 +1,7 @@
 import { Link } from "react-router-dom";
 import { pets } from "../../../data/pets";
 import AnimalCard from "../../../components/layout/AnimalCard";
+import PageHero from "../../../components/layout/PageHero";
 import CampanhasCarrossel from "../../../components/layout/CampanhasCarrossel";
 import { campanhasEmDestaque } from "../../../data/publicacoes";
 import type { Animal } from "../../../components/layout/AnimalCard";
@@ -49,40 +50,31 @@ const formasAjuda: FormaAjuda[] = [
 export default function Home(): React.JSX.Element {
   return (
     <main>
-      {/* =====================================================
-          HERO
-      ====================================================== */}
-      <section
-        className="relative flex min-h-[430px] items-center bg-cover bg-center"
-        style={{ backgroundImage: "url('src/assets/hero/hero.png')" }}
+            <PageHero
+        grande
+        titulo={
+          <>
+            Cada focinho merece um <br /> lar cheio de amor
+          </>
+        }
+        descricao="A Focinho Amigo resgata, cuida e encontra famílias definitivas para animais abandonados. Junte-se a nós nesta missão de salvar vidas."
+        imagem="src/assets/images/hero/heroHome.png"
       >
-        <div className="absolute inset-0 bg-black/40" />
-        <div className="relative z-10 mx-auto w-full max-w-7xl px-5 lg:px-14">
-          <div className="max-w-xl text-white">
-            <h1 className="text-4xl font-extrabold leading-tight md:text-5xl">
-              Cada focinho merece um <br /> lar cheio de amor
-            </h1>
-            <p className="mt-4 max-w-lg text-sm leading-6 text-white/90 md:text-base">
-              A Focinho Amigo resgata, cuida e encontra famílias definitivas para
-              animais abandonados. Junte-se a nós nesta missão de salvar vidas.
-            </p>
-            <div className="mt-6 flex flex-wrap gap-3">
-              <Link
-                to="/adocao"
-                className="rounded-lg bg-marca px-5 py-3 text-sm font-bold text-white transition hover:opacity-90"
-              >
-                Quero Adotar
-              </Link>
-              <Link
-                to="/como-ajudar"
-                className="rounded-lg bg-destaque px-5 py-3 text-sm font-bold text-zinc-900 transition hover:bg-destaque-escura"
-              >
-                Quero Ajudar
-              </Link>
-            </div>
-          </div>
+        <div className="mt-6 flex flex-wrap gap-3">
+          <Link
+            to="/adocao"
+            className="rounded-lg bg-marca px-5 py-3 text-sm font-bold text-white transition hover:opacity-90"
+          >
+            Quero Adotar
+          </Link>
+          <Link
+            to="/como-ajudar"
+            className="rounded-lg bg-destaque px-5 py-3 text-sm font-bold text-zinc-900 transition hover:bg-destaque-escura"
+          >
+            Quero Ajudar
+          </Link>
         </div>
-      </section>
+      </PageHero>
 
             {/* =====================================================
           CAMPANHAS URGENTES / EM DESTAQUE

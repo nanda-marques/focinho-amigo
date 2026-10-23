@@ -1,5 +1,6 @@
 import { Link } from "react-router-dom";
 import PublicFooter from "../../../components/layout/PublicFooter";
+import PageHero from "../../../components/layout/PageHero";
 import {
   IconCheck,
   IconGift,
@@ -47,27 +48,11 @@ function Acao({ forma }) {
 export default function Help() {
   return (
     <>
-      {/* =====================================================
-          HERO
-      ====================================================== */}
-      <section
-        className="relative flex min-h-[260px] items-center bg-cover bg-center md:min-h-[320px]"
-        style={{ backgroundImage: "url('/images/como-ajudar/hero.jpg')" }}
-      >
-        <div className="absolute inset-0 bg-black/45" />
-        <div className="relative z-10 mx-auto w-full max-w-7xl px-5 py-8 lg:px-14">
-          <div className="max-w-xl text-white md:max-w-3xl">
-            <h1 className="text-3xl font-extrabold md:text-4xl">
-              Toda Ajuda Transforma Vidas
-            </h1>
-            <p className="mt-3 text-sm leading-6 text-white/90 md:text-base">
-              Seja doando mantimentos, apadrinhando uma patinha necessitada ou
-              adotando de forma responsável. Encontre a alternativa que mais
-              combina com você.
-            </p>
-          </div>
-        </div>
-      </section>
+      <PageHero
+  titulo="Toda Ajuda Transforma Vidas"
+  descricao="Seja doando mantimentos, apadrinhando uma patinha necessitada ou adotando de forma responsável. Encontre a alternativa que mais combina com você."
+  imagem="src/assets/images/hero/heroHelp.png"
+/>
 
       {/* =====================================================
           FORMAS DE CONTRIBUIR

@@ -1,5 +1,6 @@
 import { Link } from "react-router-dom";
 import PublicFooter from "../../../components/layout/PublicFooter";
+import PageHero from "../../../components/layout/PageHero";
 
 /** Propriedades SVG de ícones internos. */
 const iconProps = {
@@ -105,23 +106,11 @@ const equipe: Equipe[] = [
 export default function About(): React.JSX.Element {
   return (
     <>
-      {/* =====================================================
-          HERO
-      ====================================================== */}
-      <section
-        className="relative flex min-h-[220px] items-center bg-cover bg-center md:min-h-[290px]"
-        style={{ backgroundImage: "url('/images/sobre-nos/hero.jpg')" }}
-      >
-        <div className="absolute inset-0 bg-black/55" />
-        <div className="relative z-10 mx-auto w-full max-w-7xl px-5 py-8 lg:px-14">
-          <div className="max-w-2xl text-white">
-            <h1 className="text-3xl font-extrabold md:text-4xl">Nossa História</h1>
-            <p className="mt-3 text-sm leading-6 text-white/90 md:text-base">
-              Nossa visão é criar um mundo sem abandono e maus-tratos. Temos o objetivo de resgatar, reabilitar e encaminhar para adoção animais retirados das ruas e de situações de maus-tratos.
-            </p>
-          </div>
-        </div>
-      </section>
+    <PageHero
+  titulo="Nossa História"
+  descricao="Nossa visão é criar um mundo sem abandono e maus-tratos. Temos o objetivo de resgatar, reabilitar e encaminhar para adoção animais retirados das ruas e de situações de maus-tratos."
+  imagem="src/assets/images/hero/heroAbout.png"
+    />
 
       {/* =====================================================
           NOSSOS PILARES
