@@ -5,6 +5,7 @@ import PageHero from "../../../components/layout/PageHero";
 import CampanhasCarrossel from "../../../components/layout/CampanhasCarrossel";
 import { campanhasEmDestaque } from "../../../data/publicacoes";
 import type { Animal } from "../../../components/layout/AnimalCard";
+import Newsletter from "../newsletter/newsletter";
 
 /** Tipo de item de forma de ajuda. */
 interface FormaAjuda {
