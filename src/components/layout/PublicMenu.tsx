@@ -15,13 +15,13 @@ interface FiltroItem {
 
 const links: LinkItem[] = [
   { to: "/", label: "Início" },
-  { to: "/sobre-nos", label: "Sobre Nós" },
   { to: "/adocao", label: "Adoção" },
   { to: "/apadrinhamento", label: "Apadrinhamento" },
   { to: "/voluntariado", label: "Voluntariado" },
+  { to: "/campanhas-e-noticias", label: "Publicações" },
   { to: "/como-ajudar", label: "Como Ajudar" },
   { to: "/contato", label: "Contato" },
-  { to: "/campanhas-e-noticias", label: "Eventos" },
+    { to: "/sobre-nos", label: "Sobre Nós" },
 ];
 
 const filtros: FiltroItem[] = [

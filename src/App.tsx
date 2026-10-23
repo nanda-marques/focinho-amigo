@@ -13,6 +13,7 @@ import Volunteer from "./pages/public/Volunteer/Volunteer";
 import Help from "./pages/public/Help/Help";
 import Contact from "./pages/public/Contact/Contact";
 import CampaignsNews from "./pages/public/CampaignsNews/CampaignsNews";
+import CampaignDetail from "./pages/public/CampaignDetail/CampaignDetail";
 
 import Login from "./pages/admin/Login/Login";
 import Register from "./pages/admin/Register/Register";
@@ -59,6 +60,7 @@ function App(): JSX.Element {
           <Route path="/como-ajudar" element={<Help />} />
           <Route path="/contato" element={<Contact />} />
           <Route path="/campanhas-e-noticias" element={<CampaignsNews />} />
+          <Route path="/campanhas-e-noticias/:id" element={<CampaignDetail />} />
         </Route>
 
         <Route path="/admin/login" element={<Login />} />
