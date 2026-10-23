@@ -1,6 +1,8 @@
 import { Link } from "react-router-dom";
 import { pets } from "../../../data/pets";
 import AnimalCard from "../../../components/layout/AnimalCard";
+import CampanhasCarrossel from "../../../components/layout/CampanhasCarrossel";
+import { campanhasEmDestaque } from "../../../data/publicacoes";
 import type { Animal } from "../../../components/layout/AnimalCard";
 
 /** Tipo de item de forma de ajuda. */
@@ -82,39 +84,16 @@ export default function Home(): React.JSX.Element {
         </div>
       </section>
 
-      {/* =====================================================
-          CAMPANHA URGENTE
+            {/* =====================================================
+          CAMPANHAS URGENTES / EM DESTAQUE
       ====================================================== */}
-      <section className="bg-white px-5 py-10 lg:px-14">
-        <div className="mx-auto max-w-6xl">
-          <div className="grid overflow-hidden rounded-2xl border border-destaque bg-[#fffdf3] md:grid-cols-[280px_1fr]">
-            <img
-              src="src/assets/images/pets/rex.png"
-              alt="Rex"
-              className="h-full min-h-[190px] w-full object-cover"
-            />
-            <div className="flex flex-col justify-center p-6 md:p-8">
-              <span className="w-fit rounded-full bg-destaque/20 px-3 py-1 text-[10px] font-bold uppercase text-destaque-escura">
-                Campanha urgente
-              </span>
-              <h2 className="mt-3 text-2xl font-extrabold text-zinc-800">
-                Ajude o Rex! Ele precisa de uma cirurgia.
-              </h2>
-              <p className="mt-2 max-w-2xl text-sm leading-5 text-zinc-500">
-                O Rex foi resgatado com uma fratura complexa no quadril após sofrer
-                um atropelamento. Precisamos arrecadar o valor do procedimento
-                cirúrgico ortopédico e os custos pós-operatórios.
-              </p>
-              <Link
-                to="/como-ajudar"
-                className="mt-5 w-fit rounded-lg bg-marca px-5 py-3 text-xs font-bold text-white"
-              >
-                Contribuir Agora
-              </Link>
-            </div>
+      {campanhasEmDestaque.length > 0 && (
+        <section className="bg-white px-5 py-10 lg:px-14">
+          <div className="mx-auto max-w-6xl">
+            <CampanhasCarrossel campanhas={campanhasEmDestaque} variant="home" />
           </div>
-        </div>
-      </section>
+        </section>
+      )}
 
       {/* =====================================================
           PETS
