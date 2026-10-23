@@ -1,5 +1,6 @@
 import { useState } from "react";
 import PublicFooter from "../../../components/layout/PublicFooter";
+import PageHero from "../../../components/layout/PageHero";
 import {
   IconArrowRight,
   IconChevronDown,
@@ -81,24 +82,11 @@ export default function Contact() {
 
   return (
     <>
-      {/* =====================================================
-          HERO
-      ====================================================== */}
-      <section
-        className="relative flex min-h-[230px] items-center bg-cover bg-center md:min-h-[345px]"
-        style={{ backgroundImage: "url('/images/contato/hero.jpg')" }}
-      >
-        <div className="absolute inset-0 bg-black/50" />
-        <div className="relative z-10 mx-auto w-full max-w-7xl px-5 py-8 lg:px-14">
-          <div className="max-w-xl text-white md:max-w-3xl">
-            <h1 className="text-3xl font-extrabold md:text-4xl">Fale Conosco</h1>
-            <p className="mt-3 text-sm leading-6 text-white/90 md:text-base">
-              Tem dúvidas sobre o processo de adoção, doações ou quer agendar
-              uma visita? Nossa equipe está de braços abertos para te ouvir.
-            </p>
-          </div>
-        </div>
-      </section>
+    <PageHero
+  titulo="Fale Conosco"
+  descricao="Tem dúvidas sobre o processo de adoção, doações ou quer agendar uma visita? Nossa equipe está de braços abertos para te ouvir."
+  imagem="src/assets/images/hero/heroContact.png"
+    />
 
       {/* =====================================================
           CANAIS + FORMULÁRIO
