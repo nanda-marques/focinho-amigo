@@ -63,6 +63,7 @@ interface CampoProps
   erro?: string;
   icone?: ComponentType<{ className?: string }>;
   direita?: ReactNode;
+  valido?: boolean;
 }
 
 function Campo({
@@ -70,17 +71,20 @@ function Campo({
   erro,
   icone: Icone,
   direita,
+  valido,
   ...input
 }: CampoProps): JSX.Element {
+  const borda = erro
+    ? "border-red-500 text-red-500 focus-within:ring-red-500/10"
+    : valido
+      ? "border-emerald-500 text-emerald-600 focus-within:ring-emerald-500/10"
+      : "border-[#dce5ef] text-[#687d9a] focus-within:border-[#2174b7] focus-within:ring-[#2174b7]/10";
+
   return (
     <label className="block">
       <span className="block mb-1.5 text-[12.5px] font-bold">{label}</span>
       <div
-        className={`h-10 flex items-center gap-2.5 px-3 bg-[#f7f9fb] border rounded-lg focus-within:ring-4 ${
-          erro
-            ? "border-red-500 text-red-500 focus-within:ring-red-500/10"
-            : "border-[#dce5ef] text-[#687d9a] focus-within:border-[#2174b7] focus-within:ring-[#2174b7]/10"
-        }`}
+        className={`h-10 flex items-center gap-2.5 px-3 bg-[#f7f9fb] border rounded-lg focus-within:ring-4 ${borda}`}
       >
         {Icone && <Icone className="w-[17px] h-[17px] shrink-0" />}
         <input
@@ -132,6 +136,10 @@ export default function Cadastro(): JSX.Element {
   const nivel = nivelSenha(f.senha);
   const temErro = Object.values(erros).some(Boolean);
 
+  const senhasPreenchidas = f.senha.length > 0 && f.confirmar.length > 0;
+  const senhasBatem = senhasPreenchidas && f.senha === f.confirmar;
+  const senhasDiferem = senhasPreenchidas && f.senha !== f.confirmar;
+
   useEffect(() => {
     if (!foto) {
       setPreview("");
@@ -167,43 +175,43 @@ export default function Cadastro(): JSX.Element {
   }
 
   async function enviar(e: FormEvent) {
-  e.preventDefault();
-  const x: Erros = {};
+    e.preventDefault();
+    const x: Erros = {};
 
-  (["nome", "sobrenome", "email", "senha", "confirmar"] as const).forEach(
-    (c) => {
-      if (!f[c].trim()) x[c] = "Campo obrigatório";
-    }
-  );
-  if (f.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(f.email)) {
-    x.email = "E-mail inválido";
-  }
-  if (f.senha && nivel < 2) x.senha = "Senha muito fraca";
-  if (f.confirmar && f.senha !== f.confirmar) {
-    x.confirmar = "As senhas não coincidem";
-  }
-  if (erros.foto) x.foto = erros.foto;
-
-  setErros(x);
-  if (Object.keys(x).length) return;
-
-  try {
-    await authApi.cadastrar({
-      nome: f.nome,
-      sobrenome: f.sobrenome,
-      email: f.email,
-      cargo: f.cargo,
-      senha: f.senha,
-    });
-    setSucesso(true);
-  } catch (err: unknown) {
-    const msg =
-      err instanceof Error ? err.message : "Erro ao criar conta";
-    setErros(
-      msg.toLowerCase().includes("e-mail")
-        ? { email: msg }
-        : { geral: msg }
+    (["nome", "sobrenome", "email", "senha", "confirmar"] as const).forEach(
+      (c) => {
+        if (!f[c].trim()) x[c] = "Campo obrigatório";
+      }
     );
+    if (f.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(f.email)) {
+      x.email = "E-mail inválido";
+    }
+    if (f.senha && nivel < 2) x.senha = "Senha muito fraca";
+    if (f.confirmar && f.senha !== f.confirmar) {
+      x.confirmar = "As senhas não coincidem";
+    }
+    if (erros.foto) x.foto = erros.foto;
+
+    setErros(x);
+    if (Object.keys(x).length) return;
+
+    try {
+      await authApi.cadastrar({
+        nome: f.nome,
+        sobrenome: f.sobrenome,
+        email: f.email,
+        cargo: f.cargo,
+        senha: f.senha,
+      });
+      setSucesso(true);
+    } catch (err: unknown) {
+      const msg =
+        err instanceof Error ? err.message : "Erro ao criar conta";
+      setErros(
+        msg.toLowerCase().includes("e-mail")
+          ? { email: msg }
+          : { geral: msg }
+      );
     }
   }
 
@@ -423,8 +431,26 @@ export default function Cadastro(): JSX.Element {
                 value={f.confirmar}
                 onChange={set("confirmar")}
                 erro={erros.confirmar}
+                valido={senhasBatem}
+                direita={
+                  senhasBatem ? (
+                    <FiCheck className="w-[17px] h-[17px] shrink-0 text-emerald-500" />
+                  ) : senhasDiferem ? (
+                    <FiAlertCircle className="w-[17px] h-[17px] shrink-0 text-red-500" />
+                  ) : undefined
+                }
               />
             </div>
+            {senhasBatem && (
+              <p className="mt-1 text-[11px] text-emerald-500 font-medium">
+                ✓ As senhas coincidem
+              </p>
+            )}
+            {senhasDiferem && !erros.confirmar && (
+              <p className="mt-1 text-[11px] text-amber-600 font-medium">
+                As senhas não coincidem
+              </p>
+            )}
 
             <button
               type="submit"
