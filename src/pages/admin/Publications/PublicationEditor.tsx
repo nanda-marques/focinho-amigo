@@ -46,7 +46,6 @@ const categorias = [
   "Campanhas",
   "Eventos",
   "Adoção",
-  "Campanha Urgente",
 ];
 
 /* ---------- Estilos ---------- */

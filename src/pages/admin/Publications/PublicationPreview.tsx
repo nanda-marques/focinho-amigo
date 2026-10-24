@@ -154,7 +154,7 @@ export default function PublicationPreview(): JSX.Element {
               <i className="h-[10px] w-[10px] rounded-full bg-[#f59e0b]" />
               <i className="h-[10px] w-[10px] rounded-full bg-[#10b981]" />
               <div className="ml-2.5 min-w-0 flex-1 truncate rounded-[4px] bg-white px-3 py-0.5 text-[11.5px] text-[#687d9a]">
-                focinho-amigo.org.br/
+                focinho-amigo.org.br/publicacoes/
                 {categoria.toLowerCase().replace(/\s+/g, "-")}
               </div>
             </div>
@@ -174,9 +174,12 @@ export default function PublicationPreview(): JSX.Element {
               </div>
               <nav className="ml-auto hidden gap-5 text-[13px] font-semibold md:flex">
                 <span>Início</span>
-                <span>Sobre Nós</span>
-                <span className="text-[#2174b7]">Eventos</span>
                 <span>Adoção</span>
+                <span>Apadrinhamento</span>
+                <span>Voluntariado</span>
+                <span className="text-[#2174b7]">Publicações</span>
+                <span>Como ajudar</span>
+                <span>Contato</span>
               </nav>
             </div>
             <div className={mobile ? "p-4" : "p-8"}>
@@ -224,19 +227,19 @@ export default function PublicationPreview(): JSX.Element {
                     {p.dataPublicacao ? `• ${p.dataPublicacao}` : ""}
                   </p>
                   <h2
-                    className={`m-0 mb-3.5 font-extrabold leading-[1.2] tracking-[-0.5px] text-[#242424] ${
+                    className={`m-0 mb-3.5 font-extrabold leading-[1.2] tracking-[-0.5px] text-[#242424] break-words [overflow-wrap:anywhere] hyphens-auto ${
                       mobile ? "text-[24px]" : "text-[30px]"
                     }`}
                   >
                     {titulo}
                   </h2>
                   {p.descricao && (
-                    <p className="m-0 mb-4 text-[15px] leading-[1.6] text-[#4b5b73]">
+                    <p className="m-0 mb-4 text-[15px] leading-[1.6] text-[#4b5b73] break-words [overflow-wrap:anywhere]">
                       {p.descricao}
                     </p>
                   )}
                   <div
-                    className="max-w-none text-[14.5px] leading-[1.7] text-[#334155] [&_a]:text-[#2174b7] [&_a]:underline [&_img]:max-w-full [&_p]:mb-3 [&_p]:mt-0"
+                    className="max-w-none text-[14.5px] leading-[1.7] text-[#334155] break-words [overflow-wrap:anywhere] [&_a]:text-[#2174b7] [&_a]:underline [&_img]:max-w-full [&_p]:mb-3 [&_p]:mt-0"
                     dangerouslySetInnerHTML={{ __html: conteudo }}
                   />
                   {categoria.toLowerCase().includes("campanha") && (
