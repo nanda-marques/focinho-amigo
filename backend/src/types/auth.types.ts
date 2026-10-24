@@ -33,9 +33,9 @@ export interface UsuarioPublico {
   email: string;
   cargo: string | null;
   permissoes?: Permissoes | null;
+  fotoPath?: string | null;      
 }
 
-/** Converte Cargo (modelo) → objeto de permissões. */
 export function permissoesDe(cargo: Cargo | undefined | null): Permissoes | null {
   if (!cargo) return null;
   return {
@@ -46,7 +46,6 @@ export function permissoesDe(cargo: Cargo | undefined | null): Permissoes | null
   };
 }
 
-/** Serializa admin para resposta pública (nunca expõe senhaHash). */
 export function adminParaUsuario(
   admin: Administrador,
   cargoRef?: Cargo | null

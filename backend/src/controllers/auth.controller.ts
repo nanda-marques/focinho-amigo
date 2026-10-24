@@ -4,6 +4,8 @@ import jwt from "jsonwebtoken";
 
 import Administrador from "../models/Administrador.js";
 import Cargo from "../models/Cargo.js";
+import ImagemPerfil from "../models/ImagemPerfil.js";
+import { supabase } from "../config/supabase.js";
 import { HttpError } from "../middlewares/error.middleware.js";
 import { obterJwtSecret } from "../middlewares/auth.middleware.js";
 import {
@@ -14,8 +16,22 @@ import {
   type PayloadToken,
 } from "../types/auth.types.js";
 
+async function pathFotoDe(adminId: number): Promise<string | null> {
+  const img = await ImagemPerfil.findOne({
+    where: { idAdministradores: adminId },
+  });
+  return img?.url ?? null;
+}
+
+function sanitize(name: string): string {
+  return name
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/[^a-zA-Z0-9._-]/g, "_");
+}
+
 export const authController = {
-  // POST /api/auth/cadastro
+  // POST /api/auth/cadastro 
   async cadastrar(
     req: Request<unknown, unknown, CorpoCadastro>,
     res: Response
@@ -46,9 +62,41 @@ export const authController = {
       cargo: cargoRef.id,
     });
 
+    // upload da foto de perfil no Supabase 
+    let pathFoto: string | null = null;
+
+    if (req.file) {
+      const fileName = `admins/${admin.id}/${Date.now()}_${sanitize(
+        req.file.originalname
+      )}`;
+
+      const { error: upErr } = await supabase.storage
+        .from("container-perfis")
+        .upload(fileName, req.file.buffer, {
+          contentType: req.file.mimetype,
+          upsert: false,
+        });
+
+      if (upErr) {
+        // rollback: sem foto, sem admin 
+        await admin.destroy();
+        throw new HttpError(502, `Erro ao subir foto: ${upErr.message}`);
+      }
+
+      await ImagemPerfil.create({
+        idAdministradores: admin.id,
+        url: fileName, 
+      });
+
+      pathFoto = fileName;
+    }
+
     res.status(201).json({
       mensagem: "Conta criada com sucesso.",
-      usuario: adminParaUsuario(admin, cargoRef),
+      usuario: {
+        ...adminParaUsuario(admin, cargoRef),
+        fotoPath: pathFoto, // null se não enviou foto
+      },
     });
   },
 
@@ -93,11 +141,12 @@ export const authController = {
       usuario: {
         ...adminParaUsuario(admin, cargoRef),
         permissoes: permissoesDe(cargoRef ?? null),
+        fotoPath: await pathFotoDe(admin.id), // ← NOVO
       },
     });
   },
 
-  // GET /api/auth/me  (bônus — frontend usa para revalidar sessão)
+  // GET /api/auth/me
   async me(req: Request, res: Response): Promise<void> {
     const u = req.usuario;
     if (!u) throw new HttpError(401, "Não autenticado.");
@@ -113,6 +162,7 @@ export const authController = {
       usuario: {
         ...adminParaUsuario(admin, cargoRef),
         permissoes: permissoesDe(cargoRef ?? null),
+        fotoPath: await pathFotoDe(admin.id), 
       },
     });
   },

@@ -2,6 +2,9 @@ import { Request, Response } from "express";
 import { supabase } from "../config/supabase.js";
 import { Foto } from "../models/Foto.js";
 
+import ImagemPerfil from "../models/ImagemPerfil.js";
+import { HttpError } from "../middlewares/error.middleware.js";
+
 function sanitize(name: string) {
   return name
     .normalize("NFD")
@@ -54,5 +57,30 @@ export const uploadController = {
     } catch (err: any) {
       return res.status(500).json({ error: err.message });
     }
+  },
+
+  async uploadPerfil(req: Request, res: Response): Promise<void> {
+  const u = req.usuario;
+  if (!u) throw new HttpError(401, "Não autenticado.");
+  if (!req.file) throw new HttpError(400, "Nenhum ficheiro enviado.");
+
+  const fileName = `admins/${u.id}/${Date.now()}_${sanitize(
+    req.file.originalname
+  )}`;
+
+  const { error } = await supabase.storage
+    .from("container-perfis")
+    .upload(fileName, req.file.buffer, {
+      contentType: req.file.mimetype,
+      upsert: true,
+    });
+
+    if (error) throw new HttpError(502, `Supabase: ${error.message}`);
+    await ImagemPerfil.upsert({
+      idAdministradores: u.id,
+      url: fileName,
+    });
+
+    res.json({ mensagem: "Foto atualizada.", path: fileName });
   },
 };

@@ -18,7 +18,6 @@ import {
   FiCheck,
 } from "react-icons/fi";
 
-import { useNavigate } from "react-router-dom";
 import { authApi } from "../../../services/authApi";
 
 import logo from "../../../assets/logo_pequena.svg";

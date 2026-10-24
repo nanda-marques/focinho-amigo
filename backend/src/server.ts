@@ -2,9 +2,11 @@ import "dotenv/config";
 import express from "express";
 import cors from "cors";
 
-import "./models/index.js"; 
+import "./models/index.js";
 import sequelize from "./config/database.js";
+
 import authRoutes from "./routes/auth.routes.js";
+import adminRoutes from "./routes/admin.routes.js";      
 import uploadRoutes from "./routes/upload.routes.js";
 import publicacoesRoutes from "./routes/publicacoes.routes.js";
 import animaisRoutes from "./routes/animais.routes.js";
@@ -19,6 +21,7 @@ app.use(express.json({ limit: "10mb" }));
 app.use(express.urlencoded({ limit: "10mb", extended: true }));
 
 app.use("/api/auth", authRoutes);
+app.use("/api/admin", adminRoutes);                     
 app.use("/api/upload", uploadRoutes);
 app.use("/api/publicacoes", publicacoesRoutes);
 app.use("/api/animais", animaisRoutes);

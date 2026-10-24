@@ -13,6 +13,7 @@ export interface UsuarioLogado {
   email: string;
   cargo: string | null;
   permissoes: Permissoes | null;
+  fotoPath?: string | null;    
 }
 
 export interface RespostaLogin {
@@ -37,11 +38,11 @@ export interface DadosCadastro {
   email: string;
   cargo: string;
   senha: string;
-  /** Foto opcional — se informada, o cadastro vai como multipart/form-data. */
+  // Foto opcional — se informada, o cadastro vai como multipart/form-data.
   foto?: File | null;
 }
 
-/** Erro tipado — guarda status HTTP para o componente decidir a UI. */
+// Erro tipado — guarda status HTTP para o componente decidir a UI.
 export class ErroApi extends Error {
   constructor(public status: number, mensagem: string) {
     super(mensagem);
@@ -58,8 +59,6 @@ type OpcoesRequisicao = Omit<RequestInit, "headers"> & {
   headers?: Record<string, string>;
 };
 
-// ===== Requisição genérica =====
-
 async function requisicao<T>(
   caminho: string,
   opcoes: OpcoesRequisicao = {}
@@ -67,7 +66,7 @@ async function requisicao<T>(
   const token = localStorage.getItem("token");
 
   const headers: Record<string, string> = {
-    // Só define Content-Type se não for FormData (multipart precisa que o browser defina o boundary)
+    // Só define Content-Type se não for FormData 
     ...(opcoes.body && !(opcoes.body instanceof FormData)
       ? { "Content-Type": "application/json" }
       : {}),
@@ -100,11 +99,10 @@ async function requisicao<T>(
   return dados as T;
 }
 
-// ===== API =====
+// API 
 
 export const authApi = {
   cadastrar(dados: DadosCadastro): Promise<RespostaCadastro> {
-    // Se tem foto → multipart/form-data; senão, JSON (compatível com o backend antigo)
     if (dados.foto) {
       const form = new FormData();
       form.append("nome", dados.nome);
@@ -133,7 +131,7 @@ export const authApi = {
     });
   },
 
-  /** Revalida a sessão no backend (útil ao recarregar a página). */
+  // Revalida a sessão no backend 
   me(): Promise<{ usuario: UsuarioLogado }> {
     return requisicao<{ usuario: UsuarioLogado }>("/api/auth/me");
   },
@@ -160,5 +158,13 @@ export const authApi = {
 
   podeGerenciar(recurso: keyof Permissoes): boolean {
     return Boolean(authApi.usuarioAtual()?.permissoes?.[recurso]);
+  },
+
+  async urlFotoPerfil(path: string | null | undefined): Promise<string | null> {
+    if (!path) return null;
+    const resp = await requisicao<{ url: string }>(
+      `/api/upload/foto-privada?path=${encodeURIComponent(path)}&bucket=container-perfis`
+    );
+    return resp.url;
   },
 };
