@@ -24,7 +24,6 @@ import { authApi } from "../../../services/authApi";
 import logo from "../../../assets/logo_pequena.svg";
 
 const CARGOS = [
-  "Gestor de Projetos",
   "Coordenador de Adoções",
   "Coordenador de Voluntários",
   "Comunicação e Marketing",
@@ -194,6 +193,7 @@ export default function Cadastro(): JSX.Element {
       email: f.email,
       cargo: f.cargo,
       senha: f.senha,
+      foto,
     });
     setSucesso(true);
   } catch (err: unknown) {
