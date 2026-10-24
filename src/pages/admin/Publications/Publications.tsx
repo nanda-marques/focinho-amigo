@@ -345,7 +345,7 @@ export default function Publications(): JSX.Element {
                             <div className="h-[40px] w-[40px] rounded-[6px] bg-[#eef2f6]" />
                           )}
                         </td>
-                        <td className="max-w-[300px] px-2 py-3 font-bold">
+                        <td className="max-w-[300px] truncate px-2 py-3 font-bold" title={p.titulo}>
                           {p.titulo}
                         </td>
                         <td className="whitespace-nowrap px-2 py-3 text-[#3d4b63]">
