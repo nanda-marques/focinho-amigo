@@ -7,6 +7,7 @@ export interface PerfilAdmin {
   cargo: string | null;
   ativo: boolean;
   criadoEm: string;
+  fotoPath: string | null;         
 }
 
 interface ErroApi {
@@ -59,6 +60,7 @@ async function requisicao<T>(
 }
 
 export const adminApi = {
+
   meuPerfil: (): Promise<PerfilAdmin> =>
     requisicao<PerfilAdmin>("/api/admin/me"),
 
@@ -79,4 +81,31 @@ export const adminApi = {
       method: "PUT",
       body: JSON.stringify(dados),
     }),
+
+  // POST /api/upload/perfil → multipart, autenticado
+  atualizarFotoPerfil: (
+    file: File
+  ): Promise<{ mensagem: string; path: string }> => {
+    const form = new FormData();
+    form.append("foto", file);
+    return requisicao<{ mensagem: string; path: string }>(
+      "/api/upload/perfil",
+      {
+        method: "POST",
+        body: form,
+      }
+    );
+  },
+
+  // GET /api/upload/foto-privada?path=...&bucket=container-perfis
+  urlFotoPerfil: (
+    path: string | null | undefined
+  ): Promise<string | null> => {
+    if (!path) return Promise.resolve(null);
+    return requisicao<{ url: string }>(
+      `/api/upload/foto-privada?path=${encodeURIComponent(
+        path
+      )}&bucket=container-perfis`
+    ).then((r) => r.url);
+  },
 };

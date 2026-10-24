@@ -11,6 +11,8 @@ import {
 
 import AdminHeader from "../../../components/layout/adminHeader";
 import { adminApi } from "../../../services/adminApi";
+import { authApi } from "../../../services/authApi";
+import { useFotoPerfil } from "../../../hooks/useFotoPerfil";
 
 type TipoMensagem = "erro" | "sucesso" | "";
 
@@ -32,8 +34,11 @@ export default function Configuracoes() {
     nomeCompleto: "",
     email: "",
     cargo: "",
-    foto: "",
+    foto: "", // path do bucket privado (ex.: "admins/5/1717_foto.jpg")
   });
+  const [arquivoFoto, setArquivoFoto] = useState<File | null>(null);
+  const [previewUrl, setPreviewUrl] = useState<string>("");
+
   const [carregando, setCarregando] = useState(true);
   const [salvandoPerfil, setSalvandoPerfil] = useState(false);
   const [salvandoSenha, setSalvandoSenha] = useState(false);
@@ -49,6 +54,20 @@ export default function Configuracoes() {
   const [mostrarConfirmarSenha, setMostrarConfirmarSenha] = useState(false);
   const [mensagem, setMensagem] = useState<Mensagem>({ tipo: "", texto: "" });
 
+  // Resolve o path do bucket privado em signed URL
+  const { url: fotoUrlAtual } = useFotoPerfil(perfil.foto);
+
+  // Preview local enquanto há arquivo selecionado (antes de salvar)
+  useEffect(() => {
+    if (!arquivoFoto) {
+      setPreviewUrl("");
+      return;
+    }
+    const url = URL.createObjectURL(arquivoFoto);
+    setPreviewUrl(url);
+    return () => URL.revokeObjectURL(url);
+  }, [arquivoFoto]);
+
   useEffect(() => {
     let ativo = true;
     adminApi
@@ -59,7 +78,7 @@ export default function Configuracoes() {
           nomeCompleto: p.nomeCompleto,
           email: p.email,
           cargo: p.cargo ?? "",
-          foto: "",
+          foto: p.fotoPath ?? "", 
         });
       })
       .catch((e: unknown) => {
@@ -91,33 +110,71 @@ export default function Configuracoes() {
   function handleFotoChange(e: ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
     if (!file) return;
-    if (file.size > 5 * 1024 * 1024) {
-      setMensagem({ tipo: "erro", texto: "A foto deve ter no máximo 5MB." });
+
+    if (!["image/png", "image/jpeg"].includes(file.type)) {
+      setMensagem({ tipo: "erro", texto: "Use PNG, JPG ou JPEG." });
       return;
     }
-    const reader = new FileReader();
-    reader.onloadend = () => {
-      setPerfil((prev) => ({ ...prev, foto: String(reader.result ?? "") }));
-    };
-    reader.readAsDataURL(file);
+    if (file.size > 2 * 1024 * 1024) {
+      setMensagem({ tipo: "erro", texto: "A foto deve ter no máximo 2MB." });
+      return;
+    }
+
+    setArquivoFoto(file);
+    setMensagem({ tipo: "", texto: "" });
   }
 
   async function handleSalvarPerfil(e: FormEvent<HTMLFormElement>) {
-    e.preventDefault();
-    setSalvandoPerfil(true);
-    setMensagem({ tipo: "", texto: "" });
-    try {
-      const resp = await adminApi.atualizarPerfil({
-        nomeCompleto: perfil.nomeCompleto,
-        email: perfil.email,
-      });
-      setMensagem({ tipo: "sucesso", texto: resp.mensagem });
-      window.setTimeout(() => setMensagem({ tipo: "", texto: "" }), 4000);
-    } catch (err: unknown) {
-      setMensagem({
-        tipo: "erro",
-        texto: err instanceof Error ? err.message : "Erro ao salvar perfil.",
-      });
+  e.preventDefault();
+  setSalvandoPerfil(true);
+  setMensagem({ tipo: "", texto: "" });
+
+  try {
+    // Atualiza nome + email
+    const resp = await adminApi.atualizarPerfil({
+      nomeCompleto: perfil.nomeCompleto,
+      email: perfil.email,
+    });
+
+    // Sincroniza localStorage 
+    const u = authApi.usuarioAtual();
+    if (u) {
+      const usuarioAtualizado = {
+        ...u,
+        nomeCompleto: resp.usuario.nomeCompleto ?? u.nomeCompleto,
+        email: resp.usuario.email ?? u.email,
+      };
+      localStorage.setItem("usuario", JSON.stringify(usuarioAtualizado));
+      window.dispatchEvent(new Event("usuario-atualizado"));
+    }
+
+    // Se tem foto nova, envia e atualiza o path
+    if (arquivoFoto) {
+      const up = await adminApi.atualizarFotoPerfil(arquivoFoto);
+
+      setPerfil((p) => ({ ...p, foto: up.path }));
+
+      const u2 = authApi.usuarioAtual();
+      if (u2) {
+        localStorage.setItem(
+          "usuario",
+          JSON.stringify({ ...u2, fotoPath: up.path })
+        );
+        window.dispatchEvent(new Event("usuario-atualizado"));
+      }
+      setArquivoFoto(null);
+    }
+
+    setMensagem({
+      tipo: "sucesso",
+      texto: resp.mensagem || "Perfil atualizado.",
+    });
+    window.setTimeout(() => setMensagem({ tipo: "", texto: "" }), 4000);
+  } catch (err: unknown) {
+    setMensagem({
+      tipo: "erro",
+      texto: err instanceof Error ? err.message : "Erro ao salvar perfil.",
+    });
     } finally {
       setSalvandoPerfil(false);
     }
@@ -130,10 +187,7 @@ export default function Configuracoes() {
       !seguranca.novaSenha ||
       !seguranca.confirmarNovaSenha
     ) {
-      setMensagem({
-        tipo: "erro",
-        texto: "Preencha todos os campos de senha.",
-      });
+      setMensagem({ tipo: "erro", texto: "Preencha todos os campos de senha." });
       return;
     }
     if (seguranca.novaSenha !== seguranca.confirmarNovaSenha) {
@@ -164,13 +218,17 @@ export default function Configuracoes() {
     }
   }
 
-  const iniciaisUsuario = perfil.nomeCompleto
-    .split(" ")
-    .filter(Boolean)
-    .map((p) => p[0])
-    .slice(0, 2)
-    .join("")
-    .toUpperCase() || "AD";
+  const iniciaisUsuario =
+    perfil.nomeCompleto
+      .split(" ")
+      .filter(Boolean)
+      .map((p) => p[0])
+      .slice(0, 2)
+      .join("")
+      .toUpperCase() || "AD";
+
+  // Qual imagem mostrar no avatar: preview local > foto atual > iniciais
+  const avatarSrc = previewUrl || fotoUrlAtual || null;
 
   return (
     <div className="min-h-full flex min-w-0 flex-1 flex-col bg-[#f3f4f6] font-['Inter',sans-serif] text-[#1f2937]">
@@ -235,25 +293,44 @@ export default function Configuracoes() {
                     <label className="mb-1.5 block text-xs font-extrabold text-[#374151]">
                       Foto
                     </label>
+
                     <input
                       type="file"
                       ref={fotoInputRef}
                       onChange={handleFotoChange}
-                      accept="image/*"
+                      accept="image/png,image/jpeg"
                       className="hidden"
                     />
-                    <button
-                      type="button"
-                      onClick={() => fotoInputRef.current?.click()}
-                      className="flex w-full items-center gap-3 rounded-lg border border-slate-200 bg-[#f9fafb] px-4 py-2.5 text-sm text-slate-500 hover:bg-slate-100"
-                    >
-                      <LuUpload className="h-4 w-4 text-slate-400" />
-                      <span className="truncate">
-                        {perfil.foto
-                          ? "Foto carregada (upload em breve)"
-                          : "Upload de arquivo (PNG, JPG, JPEG)"}
-                      </span>
-                    </button>
+
+                    <div className="flex items-center gap-3">
+                      {/* avatar: preview > foto atual > iniciais */}
+                      <div className="grid h-14 w-14 shrink-0 place-items-center overflow-hidden rounded-full bg-[#e8f3fd] text-[13px] font-bold text-[#0874ca]">
+                        {avatarSrc ? (
+                          <img
+                            src={avatarSrc}
+                            alt="Foto de perfil"
+                            className="h-full w-full object-cover"
+                          />
+                        ) : (
+                          <span>{iniciaisUsuario}</span>
+                        )}
+                      </div>
+
+                      <button
+                        type="button"
+                        onClick={() => fotoInputRef.current?.click()}
+                        className="flex w-full items-center gap-3 rounded-lg border border-slate-200 bg-[#f9fafb] px-4 py-2.5 text-sm text-slate-500 hover:bg-slate-100"
+                      >
+                        <LuUpload className="h-4 w-4 text-slate-400" />
+                        <span className="truncate">
+                          {arquivoFoto
+                            ? arquivoFoto.name
+                            : perfil.foto
+                            ? "Trocar foto"
+                            : "Upload de arquivo (PNG, JPG, JPEG)"}
+                        </span>
+                      </button>
+                    </div>
                   </div>
                 </div>
 
@@ -328,7 +405,7 @@ export default function Configuracoes() {
   );
 }
 
-/* ------------------------------ Campo texto ------------------------------ */
+// Campo texto 
 interface CampoProps {
   label: string;
   name: string;
@@ -366,7 +443,7 @@ function Campo({
   );
 }
 
-// senha
+// Campo senha
 interface CampoSenhaProps {
   label: string;
   name: keyof Seguranca;

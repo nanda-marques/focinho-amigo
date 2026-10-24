@@ -1,7 +1,5 @@
 const API_URL = import.meta.env.VITE_API_URL ?? "http://localhost:3000";
 
-// Tipos 
-
 export interface Permissoes {
   animais: boolean;
   conteudo: boolean;
@@ -15,6 +13,7 @@ export interface UsuarioLogado {
   email: string;
   cargo: string | null;
   permissoes: Permissoes | null;
+  fotoPath?: string | null;    
 }
 
 export interface RespostaLogin {
@@ -39,9 +38,19 @@ export interface DadosCadastro {
   email: string;
   cargo: string;
   senha: string;
+  // Foto opcional — se informada, o cadastro vai como multipart/form-data.
+  foto?: File | null;
 }
 
-interface ErroApi {
+// Erro tipado — guarda status HTTP para o componente decidir a UI.
+export class ErroApi extends Error {
+  constructor(public status: number, mensagem: string) {
+    super(mensagem);
+    this.name = "ErroApi";
+  }
+}
+
+interface ErroBruto {
   mensagem?: string;
   erro?: string;
 }
@@ -50,8 +59,6 @@ type OpcoesRequisicao = Omit<RequestInit, "headers"> & {
   headers?: Record<string, string>;
 };
 
-// Request
-
 async function requisicao<T>(
   caminho: string,
   opcoes: OpcoesRequisicao = {}
@@ -59,6 +66,7 @@ async function requisicao<T>(
   const token = localStorage.getItem("token");
 
   const headers: Record<string, string> = {
+    // Só define Content-Type se não for FormData 
     ...(opcoes.body && !(opcoes.body instanceof FormData)
       ? { "Content-Type": "application/json" }
       : {}),
@@ -66,54 +74,67 @@ async function requisicao<T>(
     ...opcoes.headers,
   };
 
-  const resposta = await fetch(`${API_URL}${caminho}`, {
-    ...opcoes,
-    headers,
-  });
+  const resposta = await fetch(`${API_URL}${caminho}`, { ...opcoes, headers });
 
   if (resposta.status === 204 || resposta.status === 205) {
-    if (!resposta.ok) {
-      throw new Error(`Erro ${resposta.status} em ${caminho}`);
-    }
+    if (!resposta.ok) throw new ErroApi(resposta.status, `Erro ${resposta.status}`);
     return undefined as T;
   }
 
   const texto = await resposta.text();
   let dados: unknown = null;
   if (texto) {
-    try {
-      dados = JSON.parse(texto);
-    } catch {
-      dados = texto;
-    }
+    try { dados = JSON.parse(texto); } catch { dados = texto; }
   }
 
   if (!resposta.ok) {
-    const erro = dados as ErroApi | string | null;
+    const erro = dados as ErroBruto | string | null;
     const msg =
       typeof erro === "string"
         ? erro
         : erro?.mensagem ?? erro?.erro ?? `Erro ${resposta.status}`;
-    throw new Error(msg);
+    throw new ErroApi(resposta.status, msg);
   }
 
   return dados as T;
 }
 
-// API
+// API 
 
 export const authApi = {
-  cadastrar: (dados: DadosCadastro): Promise<RespostaCadastro> =>
-    requisicao<RespostaCadastro>("/api/auth/cadastro", {
+  cadastrar(dados: DadosCadastro): Promise<RespostaCadastro> {
+    if (dados.foto) {
+      const form = new FormData();
+      form.append("nome", dados.nome);
+      form.append("sobrenome", dados.sobrenome);
+      form.append("email", dados.email);
+      form.append("cargo", dados.cargo);
+      form.append("senha", dados.senha);
+      form.append("foto", dados.foto);
+
+      return requisicao<RespostaCadastro>("/api/auth/cadastro", {
+        method: "POST",
+        body: form,
+      });
+    }
+
+    return requisicao<RespostaCadastro>("/api/auth/cadastro", {
       method: "POST",
       body: JSON.stringify(dados),
-    }),
+    });
+  },
 
-  login: (email: string, senha: string): Promise<RespostaLogin> =>
-    requisicao<RespostaLogin>("/api/auth/login", {
+  login(email: string, senha: string): Promise<RespostaLogin> {
+    return requisicao<RespostaLogin>("/api/auth/login", {
       method: "POST",
       body: JSON.stringify({ email, senha }),
-    }),
+    });
+  },
+
+  // Revalida a sessão no backend 
+  me(): Promise<{ usuario: UsuarioLogado }> {
+    return requisicao<{ usuario: UsuarioLogado }>("/api/auth/me");
+  },
 
   salvarSessao(resposta: RespostaLogin): void {
     localStorage.setItem("token", resposta.token);
@@ -128,20 +149,22 @@ export const authApi = {
   usuarioAtual(): UsuarioLogado | null {
     const bruto = localStorage.getItem("usuario");
     if (!bruto) return null;
-    try {
-      return JSON.parse(bruto) as UsuarioLogado;
-    } catch {
-      return null;
-    }
+    try { return JSON.parse(bruto) as UsuarioLogado; } catch { return null; }
   },
 
   estaLogado(): boolean {
     return Boolean(localStorage.getItem("token"));
   },
 
-  /** Atalhos para checar permissão sem ler o objeto inteiro. */
   podeGerenciar(recurso: keyof Permissoes): boolean {
-    const u = authApi.usuarioAtual();
-    return Boolean(u?.permissoes?.[recurso]);
+    return Boolean(authApi.usuarioAtual()?.permissoes?.[recurso]);
+  },
+
+  async urlFotoPerfil(path: string | null | undefined): Promise<string | null> {
+    if (!path) return null;
+    const resp = await requisicao<{ url: string }>(
+      `/api/upload/foto-privada?path=${encodeURIComponent(path)}&bucket=container-perfis`
+    );
+    return resp.url;
   },
 };

@@ -5,6 +5,7 @@ import jwt from "jsonwebtoken";
 
 import Administrador from "../models/Administrador.js";
 import Cargo from "../models/Cargo.js";
+import ImagemPerfil from "../models/ImagemPerfil.js";   
 
 const router = Router();
 
@@ -14,19 +15,13 @@ interface JwtPayload {
   cargo: string;
 }
 
-// Middleware 
-
-function autenticar(
-  req: Request,
-  res: Response,
-  next: NextFunction
-): void {
+// Middleware
+function autenticar(req: Request, res: Response, next: NextFunction): void {
   const header = req.headers.authorization;
   if (!header?.startsWith("Bearer ")) {
     res.status(401).json({ mensagem: "Token não enviado." });
     return;
   }
-
   const token = header.slice("Bearer ".length);
   try {
     const payload = jwt.verify(
@@ -40,8 +35,15 @@ function autenticar(
   }
 }
 
-// GET /api/admin/me 
+// Helper: busca o path da foto de perfil
+async function pathFotoDe(adminId: number): Promise<string | null> {
+  const img = await ImagemPerfil.findOne({
+    where: { idAdministradores: adminId },
+  });
+  return img?.url ?? null;
+}
 
+// GET /api/admin/me
 router.get(
   "/me",
   autenticar,
@@ -63,6 +65,7 @@ router.get(
         cargo: cargoRef?.nomeCargo ?? null,
         ativo: admin.ativo,
         criadoEm: admin.criadoEm,
+        fotoPath: await pathFotoDe(admin.id),  
       });
     } catch (erro: unknown) {
       console.error("Erro ao buscar perfil:", erro);
@@ -72,7 +75,6 @@ router.get(
 );
 
 // PUT /api/admin/me 
-
 interface CorpoPerfil {
   nomeCompleto?: string;
   email?: string;
@@ -81,10 +83,7 @@ interface CorpoPerfil {
 router.put(
   "/me",
   autenticar,
-  async (
-    req: Request<unknown, unknown, CorpoPerfil>,
-    res: Response
-  ): Promise<void> => {
+  async (req: Request<unknown, unknown, CorpoPerfil>, res: Response): Promise<void> => {
     try {
       const { adminId } = req as Request & { adminId: number };
       const { nomeCompleto, email } = req.body;
@@ -111,9 +110,7 @@ router.put(
         if (email !== admin.email) {
           const existe = await Administrador.findOne({ where: { email } });
           if (existe) {
-            res.status(409).json({
-              mensagem: "Este e-mail já está em uso.",
-            });
+            res.status(409).json({ mensagem: "Este e-mail já está em uso." });
             return;
           }
           admin.email = email;
@@ -137,7 +134,6 @@ router.put(
 );
 
 // PUT /api/admin/senha
-
 interface CorpoSenha {
   senhaAtual?: string;
   novaSenha?: string;
@@ -146,30 +142,21 @@ interface CorpoSenha {
 router.put(
   "/senha",
   autenticar,
-  async (
-    req: Request<unknown, unknown, CorpoSenha>,
-    res: Response
-  ): Promise<void> => {
+  async (req: Request<unknown, unknown, CorpoSenha>, res: Response): Promise<void> => {
     try {
       const { adminId } = req as Request & { adminId: number };
       const { senhaAtual, novaSenha } = req.body;
 
       if (!senhaAtual || !novaSenha) {
-        res.status(400).json({
-          mensagem: "Preencha senha atual e nova senha.",
-        });
+        res.status(400).json({ mensagem: "Preencha senha atual e nova senha." });
         return;
       }
       if (novaSenha.length < 8) {
-        res.status(400).json({
-          mensagem: "A nova senha deve ter pelo menos 8 caracteres.",
-        });
+        res.status(400).json({ mensagem: "A nova senha deve ter pelo menos 8 caracteres." });
         return;
       }
       if (senhaAtual === novaSenha) {
-        res.status(400).json({
-          mensagem: "A nova senha deve ser diferente da atual.",
-        });
+        res.status(400).json({ mensagem: "A nova senha deve ser diferente da atual." });
         return;
       }
 
